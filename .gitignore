@@ -7,10 +7,21 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+package-lock.json
+
+# Build outputs
 dist
 dist-ssr
+build
 *.local
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
 
 # Editor directories and files
 .vscode/*
@@ -22,5 +33,46 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.env
-.env.local
+
+# OS files
+Thumbs.db
+
+# Documentation (optional - uncomment to exclude)
+# DETAILED_FLOW_DOCUMENTATION.md
+# DETAILED_FLOW_PART2.md
+# README_DOCUMENTATION.md
+# TROUBLESHOOTING.md
+# ORDER_ITEMS_SOLUTION.md
+
+# Old/unused files
+App.*.tsx
+Checkout.tsx
+Shop.tsx
+ErrorBoundary.tsx
+KombaiWrapper.tsx
+main.tsx
+
+# SQL files (keep GENERATED_SCHEMA.sql and MOCK_DATA.sql)
+database-setup.sql
+customer-list-setup.sql
+add_*.sql
+rename_*.sql
+update_*.sql
+
+# Temporary/backup files
+*.backup
+*.bak
+*.tmp
+*~
+
+# Test files
+coverage/
+.nyc_output/
+
+# Cache
+.cache
+.parcel-cache
+.eslintcache
+
+# Images (readme folder)
+readme/
