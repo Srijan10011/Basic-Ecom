@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useProfileQuery, useUserAddressesQuery } from '../lib/utils';
 import MapPickerModal from './MapPickerModal';
+
 interface CheckoutProps {
   cart: any[];
   setCurrentPage: (page: string) => void;
@@ -28,6 +29,7 @@ export default function Checkout({ cart, setCurrentPage, session, clearCart }: C
   const [state, setState] = useState('');
   const [location, setLocation] = useState<string | null>(null);
   const [showMapModal, setShowMapModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   // Get current user
   const [user, setUser] = useState<any>(null);
 
@@ -148,8 +150,12 @@ export default function Checkout({ cart, setCurrentPage, session, clearCart }: C
 
   const totalPrice = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
+   
   const handlePlaceOrder = async () => {
     console.log('=== BUTTON CLICKED ===');
+      if (isSubmitting) return;
+  setIsSubmitting(true);
+
     console.log('User state:', user);
     console.log('Session state:', session);
 
@@ -405,7 +411,8 @@ export default function Checkout({ cart, setCurrentPage, session, clearCart }: C
           orderData: {
             ...orderData,
             id: data[0].id
-          }
+          },
+          expiresAt: Date.now() + 1000 * 60 * 60 * 24 // 24 hours
         };
 
         // Store multiple orders in localStorage
@@ -435,6 +442,9 @@ export default function Checkout({ cart, setCurrentPage, session, clearCart }: C
       console.error('❌ UNEXPECTED ERROR:', error);
       console.error('Error stack:', error.stack);
       alert(`An unexpected error occurred: ${error.message || 'Unknown error'}`);
+    }
+     finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -553,8 +563,8 @@ export default function Checkout({ cart, setCurrentPage, session, clearCart }: C
               <p className="text-xl font-bold text-gray-800 dark:text-white">Total</p>
               <p className="text-2xl font-bold text-gray-800 dark:text-white">Rs {(totalPrice + 5.99).toFixed(2)}</p>
             </div>
-            <button onClick={handlePlaceOrder} className="w-full mt-8 bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-semibold text-lg transition-colors">
-              Place Order - Rs {(totalPrice + 5.99).toFixed(2)}
+            <button onClick={handlePlaceOrder} disabled={isSubmitting} className="w-full mt-8 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 rounded-lg font-semibold text-lg transition-colors">
+              {isSubmitting ? "Processing..." : "Place Order"} - Rs {(totalPrice + 5.99).toFixed(2)}
             </button>
             <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-4">By placing your order, you agree to our terms and conditions.</p>
           </div>

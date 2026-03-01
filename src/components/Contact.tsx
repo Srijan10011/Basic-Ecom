@@ -14,7 +14,7 @@ export default function Contact() {
   const contactMutation = useMutation({
     mutationFn: async (formData: { name: string; email: string; message: string }) => {
       const { error } = await supabase
-        .from('contact_messages')
+        .from('contact_submissions')
         .insert([formData]);
       
       if (error) throw error;

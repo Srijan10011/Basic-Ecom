@@ -28,9 +28,9 @@ export default function Login({ setModal }: LoginProps) {
       setMessage(error.message);
       setMessageType('error');
     } else {
-      setMessage('Logged in successfully!');
-      setMessageType('success');
-      setTimeout(() => setModal(null), 1500); // Close modal after a short delay
+      setMessage('Login successful!');
+      
+      window.location.reload(); // Reload to show logged-in state
     }
     setLoading(false);
   };

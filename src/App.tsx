@@ -85,14 +85,16 @@ function App() {
     setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
   };
 
-  const refetchCart = async () => {
-    if (session?.user) {
-      const items = await fetchUserCart(session.user.id);
-      setCart(items);
-    } else {
-      setCart(loadGuestCart());
-    }
-  };
+const refetchCart = async (userSession?: any) => {
+  const activeSession = userSession || session;
+  if (activeSession?.user) {
+    const items = await fetchUserCart(activeSession.user.id);
+    setCart(items);
+  } else {
+    setCart(loadGuestCart());
+  }
+};
+
 
   const addToCart = async (product: any) => {
     if (session?.user) {
@@ -197,7 +199,7 @@ function App() {
           if (mounted) {
             setSession(session);
             // Whenever auth changes, refresh cart from appropriate source
-            await refetchCart();
+            await refetchCart(session);
           }
         });
 

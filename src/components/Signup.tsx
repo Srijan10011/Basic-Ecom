@@ -55,17 +55,24 @@ export default function Signup({ setModal }: SignupProps) {
         setFirstName('');
         setLastName('');
       } else {
-        // If data.user exists, proceed with session and profile insert
-        // This block will now only be reached if email confirmation is NOT required
-        // or if the user is somehow already active. For email confirmation flows,
-        // the profile creation will happen on first login in App.tsx.
-        setMessage('Sign up successful! Please check your email to confirm your account.');
-        setMessageType('success');
-        setEmail('');
-        setPassword('');
-        setRepeatPassword('');
-        setFirstName('');
-        setLastName('');
+  // Create profile immediately
+  if (data.user) {
+    await supabase.from('profiles').insert([{
+    id: data.user.id,
+    first_name: firstName,
+    last_name: lastName,
+    email: email,
+    role: 'user'
+  }]);
+
+  // Close modal and reload to show logged-in state
+  setModal(null);
+  window.location.reload();}
+  setEmail('');
+  setPassword('');
+  setRepeatPassword('');
+  setFirstName('');
+  setLastName('');
       }
     }
     setLoading(false);
