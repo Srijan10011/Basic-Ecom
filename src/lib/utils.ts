@@ -3,7 +3,10 @@ import { twMerge } from "tailwind-merge";
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "./supabaseClient";
-
+export { useVisibilityRefetch } from "../shared/hooks/useVisibilityRefetch";
+export { useDataFetching } from "../shared/hooks/useDataFetching";
+export { useProductsQuery, useFeaturedProductsQuery } from "../features/products/hooks/useProductsQuery";
+import { useOrderTrackingQuery } from "../features/orders/hooks/useOrderTrackingQuery";
 // Type definitions for admin orders
 export interface OrderItem {
   id: number;
@@ -16,7 +19,7 @@ export interface OrderItem {
 // Interface for guest orders
 export interface GuestOrder {
   id: number;
-  order_id: number; // Foreign key to orders table
+  order_id: string; // Foreign key to orders table
   customer_name: string;
   shipping_address: {
     phone?: string;
@@ -38,9 +41,9 @@ export interface AdminOrder {
   status: string;
   order_date: string;
   user_id?: string | null; // Can be null for guest orders
-  
+
   // Customer details for authenticated users
-  customer_details?: {
+  customer_detail?: { // Database field name (singular)
     customer_name: string;
     shipping_address: {
       phone?: string;
@@ -52,11 +55,13 @@ export interface AdminOrder {
       longitude?: number;
     };
   };
-  
+
+
   // Guest order details
   guest_order?: GuestOrder;
-  
+
   order_items?: OrderItem[];
+  items?: OrderItem[] | string; // Alternative field name for order items
   _note?: string;
 }
 
@@ -64,52 +69,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Custom hook for data fetching with retry logic
-export const useDataFetching = <T>(
-  fetchFunction: () => Promise<T>,
-  dependencies: any[] = [],
-  retryCount: number = 3,
-) => {
-  const [data, setData] = React.useState<T | null>(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
 
-  const fetchData = React.useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    let lastError: any;
-
-    for (let attempt = 1; attempt <= retryCount; attempt++) {
-      try {
-        const result = await fetchFunction();
-        setData(result);
-        return;
-      } catch (err: any) {
-        lastError = err;
-        console.warn(
-          `Data fetch failed (attempt ${attempt}/${retryCount}):`,
-          err,
-        );
-
-        if (attempt < retryCount) {
-          // Wait before retrying with exponential backoff
-          await new Promise((resolve) =>
-            setTimeout(resolve, 1000 * Math.pow(2, attempt - 1)),
-          );
-        }
-      }
-    }
-
-    setError(lastError?.message || "Failed to fetch data");
-  }, [fetchFunction, retryCount]);
-
-  React.useEffect(() => {
-    fetchData();
-  }, dependencies);
-
-  return { data, loading, error, refetch: fetchData };
-};
 
 // Debounce function for search inputs
 export const debounce = <T extends (...args: any[]) => any>(
@@ -125,105 +85,13 @@ export const debounce = <T extends (...args: any[]) => any>(
 };
 
 // Custom hook for handling data refetching when tab becomes visible
-export const useVisibilityRefetch = (
-  refetchFn: () => void,
-  shouldRefetch: boolean = true,
-  dependencies: any[] = [],
-) => {
-  const [isVisible, setIsVisible] = useState(true);
 
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      const wasVisible = isVisible;
-      const isNowVisible = !document.hidden;
-      setIsVisible(isNowVisible);
-
-      // If tab just became visible and we should refetch, do it
-      if (!wasVisible && isNowVisible && shouldRefetch) {
-        console.log("Tab became visible, re-fetching data...");
-        refetchFn();
-      }
-    };
-
-    const handleFocus = () => {
-      if (shouldRefetch) {
-        console.log("Window focused, re-fetching data...");
-        refetchFn();
-      }
-    };
-
-    const handleOnline = () => {
-      if (shouldRefetch) {
-        console.log("Network came online, re-fetching data...");
-        refetchFn();
-      }
-    };
-
-    // Set initial visibility state
-    setIsVisible(!document.hidden);
-
-    // Add event listeners
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("focus", handleFocus);
-    window.addEventListener("online", handleOnline);
-
-    // Cleanup
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("focus", handleFocus);
-      window.removeEventListener("online", handleOnline);
-    };
-  }, [refetchFn, shouldRefetch, isVisible, ...dependencies]);
-
-  return { isVisible };
-};
 
 // React Query hook for products with automatic refetching
-export const useProductsQuery = () => {
-  return useQuery({
-    queryKey: ["products"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("*, categories(id, name)");
-      if (error) {
-        throw error;
-      }
-      return data;
-    },
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: true,
-    refetchOnMount: false,
-    retry: 1,
-    // Enhanced refetch behavior for visibility changes
-    refetchInterval: (query) => {
-      // If we have no data and the query is stale, refetch every 30 seconds
-      if (!query.state.data || query.state.data.length === 0) {
-        return 30000;
-      }
-      return false; // Don't refetch if we have data
-    },
-  });
-};
+
 
 // React Query hook for featured products
-export const useFeaturedProductsQuery = () => {
-  return useQuery({
-    queryKey: ["featuredProducts"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("is_featured", true); // Fetch only featured products
 
-      if (error) {
-        throw error;
-      }
-      return data;
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false,
-  });
-};
 
 // React Query hook for a single product
 export const useProductQuery = (productId: number | null) => {
@@ -285,7 +153,7 @@ export const useUserOrdersQuery = (userId: string | undefined) => {
         .from("orders")
         .select(`
           *,
-          customer_detail!inner(
+          customer_detail!customer_detail_id(
             customer_name,
             shipping_address
           )
@@ -362,7 +230,7 @@ export const useAdminOrdersQuery = (enabled: boolean = true) => {
           .from("orders")
           .select(`
             *,
-            customer_detail(
+            customer_detail!customer_detail_id(
               customer_name,
               shipping_address
             )
@@ -448,13 +316,13 @@ export const useAdminOrdersQuery = (enabled: boolean = true) => {
             status: order.status || "pending",
             order_date: order.order_date || new Date().toISOString(),
             user_id: order.user_id,
-            
+
             // Customer details for authenticated users
-            customer_details: order.customer_detail ? {
+            customer_detail: order.customer_detail ? {
               customer_name: order.customer_detail.customer_name || "Unknown Customer",
               shipping_address: order.customer_detail.shipping_address || {}
             } : undefined,
-            
+
             // Guest order details
             guest_order: order.guest_order ? {
               id: order.guest_order.id,
@@ -464,7 +332,7 @@ export const useAdminOrdersQuery = (enabled: boolean = true) => {
               customer_email: order.guest_order.customer_email || "No email",
               created_at: order.guest_order.created_at || new Date().toISOString()
             } : undefined,
-            
+
             order_items: orderItems,
             _note: note,
           };
@@ -523,46 +391,3 @@ export const useCategoriesQuery = (enabled: boolean = true) => {
 };
 
 // React Query hook for order tracking
-export const useOrderTrackingQuery = (orderNumber: string | null) => {
-  return useQuery({
-    queryKey: ["orderTracking", orderNumber],
-    queryFn: async () => {
-      if (!orderNumber) throw new Error("No order number provided");
-      const { data, error } = await supabase
-        .from("orders")
-        .select(`
-          *,
-          guest_order(
-            customer_name,
-            shipping_address,
-            customer_email
-          ),
-          customer_detail(
-            customer_name
-          ),
-          items
-        `)
-        .eq("order_number", orderNumber)
-        .single();
-      if (error) throw error;
-
-      // Parse items if it's a string
-      if (data && typeof data.items === 'string') {
-        try {
-          data.items = JSON.parse(data.items);
-        } catch (parseError) {
-          console.error('Failed to parse items:', parseError);
-          data.items = []; // Default to empty array on parse error
-        }
-      }
-
-      return data;
-    },
-    enabled: !!orderNumber,
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: true,
-    refetchOnMount: false,
-    retry: 1,
-  });
-};

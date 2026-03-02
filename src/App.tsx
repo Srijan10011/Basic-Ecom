@@ -1,24 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import Header from './components/Header';
-import Hero from './components/Hero';
-import Features from './components/Features';
-import FeaturedProducts from './components/FeaturedProducts';
-import About from './components/About';
-import Testimonials from './components/Testimonials';
-import Newsletter from './components/Newsletter';
-import Footer from './components/Footer';
-import Shop from './components/Shop';
-import Contact from './components/Contact';
-import Login from './components/Login';
-import Signup from './components/Signup';
-import TrackOrder from './components/TrackOrder';
-import ProductDetail from './components/ProductDetail';
-import Profile from './components/Profile';
-import UpdateProfile from './components/UpdateProfile';
-import Cart from './components/Cart';
-import Checkout from './components/Checkout';
-import AdminPage from './components/AdminPage';
+
+import React, { useState, useEffect, useCallback } from 'react';
+import Header from './shared/components/Header';
+import Hero from './shared/components/Hero';
+import Features from './shared/components/Features';
+import FeaturedProducts from './features/products/components/FeaturedProducts';
+import About from './shared/components/About';
+import Testimonials from './shared/components/Testimonials';
+import Newsletter from './shared/components/Newsletter';
+import Footer from './shared/components/Footer';
+import Shop from './features/products/components/Shop';
+import Contact from './shared/components/Contact';
+import Login from './features/auth/components/Login';
+import Signup from './features/auth/components/Signup';
+import TrackOrder from './features/orders/components/TrackOrder';
+import ProductDetail from './features/products/components/ProductDetail';
+import Profile from './shared/components/Profile';
+import UpdateProfile from './shared/components/UpdateProfile';
+import Cart from './features/cart/components/Cart';
+import Checkout from './features/cart/components/Checkout';
+import AdminPage from './features/admin/components/AdminPage';
 import { useVisibilityRefetch } from './lib/utils';
+import { Toaster as SonnerToaster } from 'sonner';
 
 import { supabase, checkConnection } from './lib/supabaseClient';
 import {
@@ -30,21 +32,23 @@ import {
   loadGuestCart,
   saveGuestCart,
   clearGuestCart
-} from './lib/cart';
+} from './features/cart/services/cart';
 import { Session } from '@supabase/supabase-js';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from './components/ui/toaster';
-import GuestOrderAccess from './components/GuestOrderAccess';
+import { Toaster } from './shared/components/ui/toaster';
+import { toast } from 'sonner';
+import GuestOrderAccess from './features/orders/components/GuestOrderAccess';
+import { Product } from './types';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
       retryDelay: 1000,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      refetchOnWindowFocus: true,
+      staleTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnWindowFocus: false,
       refetchOnReconnect: true,
-      refetchOnMount: true,
+      refetchOnMount: false,
     },
   },
 });
@@ -63,7 +67,7 @@ function App() {
     const savedTheme = localStorage.getItem('theme');
     return savedTheme === 'dark' ? 'dark' : 'light';
   });
-
+const [addingToCartId, setAddingToCartId] = useState<number | null>(null);
   useEffect(() => {
     document.documentElement.classList.remove('light', 'dark');
     document.documentElement.classList.add(theme);
@@ -96,59 +100,91 @@ const refetchCart = async (userSession?: any) => {
 };
 
 
-  const addToCart = async (product: any) => {
-    if (session?.user) {
-      await addItemToUserCart(session.user.id, product.id, 1);
-      await refetchCart();
-    } else {
-      const items = [...cart];
-      const found = items.find(i => i.id === product.id);
-      if (found) {
-        found.quantity += 1;
+   const addToCart = useCallback(async (product: Product) => {
+    if (addingToCartId === product.id) return;
+    setAddingToCartId(product.id);
+    try {
+      if (session?.user) {
+        await addItemToUserCart(session.user.id, product.id, 1);
+        await refetchCart();
       } else {
-        items.push({ ...product, quantity: 1 });
+        const items = [...cart];
+        const found = items.find(i => i.id === product.id);
+        if (found) {
+          found.quantity += 1;
+        } else {
+          items.push({ ...product, quantity: 1 });
+        }
+        saveGuestCart(items);
+        setCart(items);
       }
-      saveGuestCart(items);
-      setCart(items);
+      // Show success toast
+      toast.success(`${product.name} added to cart!`, {
+        duration: 2000,
+        position: 'top-center',
+      });
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+      toast.error('Failed to add item to cart. Please try again.', {
+        duration: 3000,
+        position: 'top-center',
+      });
+    } finally {
+      setAddingToCartId(null);
     }
-  };
+  }, [session?.user, cart, addingToCartId]);
 
-  const updateCartQuantity = async (productId: number, quantity: number) => {
-    if (session?.user) {
-      await setItemQuantityInUserCart(session.user.id, productId, quantity);
-      await refetchCart();
-    } else {
-      let items;
-      if (quantity <= 0) {
-        items = cart.filter(i => i.id !== productId);
+  const updateCartQuantity = useCallback(async (productId: number, quantity: number) => {
+    try {
+      if (session?.user) {
+        await setItemQuantityInUserCart(session.user.id, productId, quantity);
+        await refetchCart();
       } else {
-        items = cart.map(i => i.id === productId ? { ...i, quantity } : i);
+        let items;
+        if (quantity <= 0) {
+          items = cart.filter(i => i.id !== productId);
+        } else {
+          items = cart.map(i => i.id === productId ? { ...i, quantity } : i);
+        }
+        saveGuestCart(items);
+        setCart(items);
       }
-      saveGuestCart(items);
-      setCart(items);
+    } catch (error) {
+      console.error('Failed to update cart:', error);
+      alert('Failed to update quantity. Please try again.');
     }
-  };
+  }, [session?.user, cart]);
 
-  const removeFromCart = async (productId: number) => {
-    if (session?.user) {
-      await removeItemFromUserCart(session.user.id, productId);
-      await refetchCart();
-    } else {
-      const items = cart.filter(item => item.id !== productId);
-      saveGuestCart(items);
-      setCart(items);
+  const removeFromCart = useCallback(async (productId: number) => {
+    try {
+      if (session?.user) {
+        await removeItemFromUserCart(session.user.id, productId);
+        await refetchCart();
+      } else {
+        const items = cart.filter(item => item.id !== productId);
+        saveGuestCart(items);
+        setCart(items);
+      }
+    } catch (error) {
+      console.error('Failed to remove from cart:', error);
+      alert('Failed to remove item. Please try again.');
     }
-  };
+  }, [session?.user, cart]);
 
-  const clearCart = async () => {
-    if (session?.user) {
-      await clearUserCart(session.user.id);
-      await refetchCart();
-    } else {
-      clearGuestCart();
-      setCart([]);
+  const clearCart = useCallback(async () => {
+    try {
+      if (session?.user) {
+        await clearUserCart(session.user.id);
+        await refetchCart();
+      } else {
+        clearGuestCart();
+        setCart([]);
+      }
+    } catch (error) {
+      console.error('Failed to clear cart:', error);
+      alert('Failed to clear cart. Please try again.');
     }
-  };
+  }, [session?.user, cart]);
 
   // Check database connection health
   const checkDatabaseConnection = async () => {
@@ -283,7 +319,7 @@ const refetchCart = async (userSession?: any) => {
         return (
           <div>
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
-            <Shop setCurrentPage={setCurrentPage} setSelectedProductId={setSelectedProductId} addToCart={addToCart} />
+            <Shop setCurrentPage={setCurrentPage} setSelectedProductId={setSelectedProductId} addToCart={addToCart} addingToCartId={addingToCartId} />
             <Footer setCurrentPage={setCurrentPage} />
           </div>
         );
@@ -307,7 +343,7 @@ const refetchCart = async (userSession?: any) => {
         return (
           <div>
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
-            <ProductDetail productId={selectedProductId} setCurrentPage={setCurrentPage} addToCart={addToCart} session={session} />
+            <ProductDetail productId={selectedProductId} setCurrentPage={setCurrentPage} addToCart={addToCart} session={session} addingToCartId={addingToCartId} />
             <Footer setCurrentPage={setCurrentPage} />
           </div>
         );
@@ -366,7 +402,7 @@ const refetchCart = async (userSession?: any) => {
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
             <Hero setCurrentPage={setCurrentPage} setModal={setModal} session={session} />
             <Features />
-            <FeaturedProducts setCurrentPage={setCurrentPage} setSelectedProductId={setSelectedProductId} addToCart={addToCart} />
+            <FeaturedProducts setCurrentPage={setCurrentPage} setSelectedProductId={setSelectedProductId} addToCart={addToCart} addingToCartId={addingToCartId} />
             <Testimonials />
             <Newsletter />
             <Footer setCurrentPage={setCurrentPage} />
@@ -383,8 +419,10 @@ const refetchCart = async (userSession?: any) => {
         {modal === 'signup' && <Signup setModal={setModal} />}
       </div>
       <Toaster />
+      <SonnerToaster richColors />
     </QueryClientProvider>
   );
 }
 
 export default App;
+
