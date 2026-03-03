@@ -41,20 +41,33 @@ export default function PaymentDetailsDialog({
     let screenshotUrl = null;
 
     if (screenshot) {
+      console.log('📸 Screenshot file:', screenshot.name, screenshot.size, 'bytes');
       const fileExt = screenshot.name.split('.').pop();
       const fileName = `payment-${Date.now()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage
+      
+      console.log('⬆️ Uploading to:', fileName);
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('payment-screenshots')
         .upload(fileName, screenshot);
 
-      if (!uploadError) {
-        const { data: urlData } = supabase.storage
-          .from('payment-screenshots')
-          .getPublicUrl(fileName);
-        screenshotUrl = urlData.publicUrl;
+      if (uploadError) {
+        console.error('❌ Upload error:', uploadError);
+        alert(`Upload failed: ${uploadError.message}`);
+        setIsSubmitting(false);
+        return;
       }
+
+      console.log('✅ Upload successful:', uploadData);
+      const { data: urlData } = supabase.storage
+        .from('payment-screenshots')
+        .getPublicUrl(fileName);
+      screenshotUrl = urlData.publicUrl;
+      console.log('🔗 Public URL:', screenshotUrl);
+    } else {
+      console.log('⚠️ No screenshot selected');
     }
 
+    console.log('💾 Updating order with screenshot URL:', screenshotUrl);
     const { error } = await supabase
       .from('orders')
       .update({

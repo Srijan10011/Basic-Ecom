@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../../shared/compon
 import { Badge } from '../../../shared/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../shared/components/ui/table';
 import { supabase } from '../../../lib/supabaseClient';
-
+import { getStatusColor } from '../../../shared/utils/orderHelpers';
 interface GuestOrderAccessProps {
   setCurrentPage: (page: string) => void;
 }
@@ -18,7 +18,7 @@ interface GuestSession {
   orderData: {
     id: string;
     order_number: string;
-    total_amount: number;
+    total_amount: string;
     status: string; // Added status to GuestSession
     order_date: string;
     items: Array<{
@@ -93,22 +93,6 @@ export default function GuestOrderAccess({ setCurrentPage }: GuestOrderAccessPro
 
   
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-200 text-yellow-800';
-      case 'processing':
-        return 'bg-blue-200 text-blue-800';
-      case 'shipped':
-        return 'bg-purple-200 text-purple-800';
-      case 'delivered':
-        return 'bg-green-200 text-green-800';
-      case 'cancelled':
-        return 'bg-red-200 text-red-800';
-      default:
-        return 'bg-gray-200 text-gray-800';
-    }
-  };
 
   const formatOrderDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -214,7 +198,7 @@ export default function GuestOrderAccess({ setCurrentPage }: GuestOrderAccessPro
                 </div>
               </TableCell>
               <TableCell className="font-semibold">
-                Rs {session.orderData.total_amount.toFixed(2)}
+                Rs {parseFloat(session.orderData.total_amount).toFixed(2)}
               </TableCell>
               <TableCell>
                 <div className="flex flex-col">

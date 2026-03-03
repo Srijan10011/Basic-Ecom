@@ -58,12 +58,24 @@ export default function Header({ currentPage = 'home', setCurrentPage, setModal,
   }, []);
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error("Error logging out:", error.message);
-    } else {
+    try {
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
+      if (error) {
+        console.error("Error logging out:", error.message);
+        // Even if server logout fails, clear local session
+        localStorage.removeItem('supabase.auth.token');
+        localStorage.removeItem('bolt-auth-token');
+      }
+    } catch (err) {
+      console.error("Logout error:", err);
+      // Clear local storage anyway
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('bolt-auth-token');
+    } finally {
+      // Always redirect to home and reload to clear state
       setCurrentPage('home');
       window.scrollTo(0, 0);
+      window.location.reload();
     }
   };
 

@@ -1,6 +1,6 @@
 import { supabase } from '../../../lib/supabaseClient';
 import { OrderData, CartItem, CheckoutFormData, GuestSession } from '../types/checkout';
-import { generatePaymentReference } from '../../../utils/paymentHelpers';
+import { generatePaymentReference } from '../../../shared/utils/paymentHelpers';
 import { parseLocation } from './locationService';
 
 export const fetchOrderDetails = async (orderId: string): Promise<{

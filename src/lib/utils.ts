@@ -41,6 +41,9 @@ export interface AdminOrder {
   status: string;
   order_date: string;
   user_id?: string | null; // Can be null for guest orders
+  payment_reference_id?: string;
+  payment_status?: string;
+  payment_screenshot_url?: string | null;
 
   // Customer details for authenticated users
   customer_detail?: { // Database field name (singular)
@@ -235,6 +238,7 @@ export const useAdminOrdersQuery = (enabled: boolean = true) => {
               shipping_address
             )
           `)
+          .in('payment_status', ['payment_submitted', 'completed'])
           .order("order_date", { ascending: false });
 
         if (ordersError) {
@@ -316,6 +320,9 @@ export const useAdminOrdersQuery = (enabled: boolean = true) => {
             status: order.status || "pending",
             order_date: order.order_date || new Date().toISOString(),
             user_id: order.user_id,
+            payment_reference_id: order.payment_reference_id,
+            payment_status: order.payment_status,
+            payment_screenshot_url: order.payment_screenshot_url,
 
             // Customer details for authenticated users
             customer_detail: order.customer_detail ? {

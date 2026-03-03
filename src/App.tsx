@@ -21,24 +21,15 @@ import Checkout from './features/cart/components/Checkout';
 import AdminPage from './features/admin/components/AdminPage';
 import { useVisibilityRefetch } from './lib/utils';
 import { Toaster as SonnerToaster } from 'sonner';
-
+import { useTheme } from './features/theme/hooks/useTheme';
+import { useAuth } from './features/auth/hooks/useAuth';
+import { useCart } from './features/cart/hooks/useCart';
 import { supabase, checkConnection } from './lib/supabaseClient';
-import {
-  fetchUserCart,
-  addItemToUserCart,
-  setItemQuantityInUserCart,
-  removeItemFromUserCart,
-  clearUserCart,
-  loadGuestCart,
-  saveGuestCart,
-  clearGuestCart
-} from './features/cart/services/cart';
-import { Session } from '@supabase/supabase-js';
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from './shared/components/ui/toaster';
-import { toast } from 'sonner';
 import GuestOrderAccess from './features/orders/components/GuestOrderAccess';
-import { Product } from './types';
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,24 +47,17 @@ const queryClient = new QueryClient({
 (window as any).queryClient = queryClient;
 
 function App() {
+  // UI State
   const [currentPage, setCurrentPage] = useState('home');
   const [modal, setModal] = useState<'login' | 'signup' | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [cart, setCart] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [resumeOrderId, setResumeOrderId] = useState<string | null>(null);
   const [connectionError, setConnectionError] = useState<string | null>(null);
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    const savedTheme = localStorage.getItem('theme');
-    return savedTheme === 'dark' ? 'dark' : 'light';
-  });
-const [addingToCartId, setAddingToCartId] = useState<number | null>(null);
-const [resumeOrderId, setResumeOrderId] = useState<string | null>(null);
-  useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+  const [isRetrying, setIsRetrying] = useState(false);
+  // Custom Hooks
+  const { theme, toggleTheme } = useTheme();
+  const { session, isLoading } = useAuth();
+  const { cart, addToCart, updateCartQuantity, removeFromCart, clearCart, addingToCartId } = useCart(session);
   useEffect(() => {
     if (modal) {
       document.body.classList.add('overflow-hidden');
@@ -85,106 +69,12 @@ const [resumeOrderId, setResumeOrderId] = useState<string | null>(null);
     };
   }, [modal]);
 
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
-  };
-
-const refetchCart = async (userSession?: any) => {
-  const activeSession = userSession || session;
-  if (activeSession?.user) {
-    const items = await fetchUserCart(activeSession.user.id);
-    setCart(items);
-  } else {
-    setCart(loadGuestCart());
-  }
-};
+  
 
 
-   const addToCart = useCallback(async (product: Product) => {
-    if (addingToCartId === product.id) return;
-    setAddingToCartId(product.id);
-    try {
-      if (session?.user) {
-        await addItemToUserCart(session.user.id, product.id, 1);
-        await refetchCart();
-      } else {
-        const items = [...cart];
-        const found = items.find(i => i.id === product.id);
-        if (found) {
-          found.quantity += 1;
-        } else {
-          items.push({ ...product, quantity: 1 });
-        }
-        saveGuestCart(items);
-        setCart(items);
-      }
-      // Show success toast
-      toast.success(`${product.name} added to cart!`, {
-        duration: 2000,
-        position: 'top-center',
-      });
-    } catch (error) {
-      console.error('Failed to add to cart:', error);
-      toast.error('Failed to add item to cart. Please try again.', {
-        duration: 3000,
-        position: 'top-center',
-      });
-    } finally {
-      setAddingToCartId(null);
-    }
-  }, [session?.user, cart, addingToCartId]);
 
-  const updateCartQuantity = useCallback(async (productId: number, quantity: number) => {
-    try {
-      if (session?.user) {
-        await setItemQuantityInUserCart(session.user.id, productId, quantity);
-        await refetchCart();
-      } else {
-        let items;
-        if (quantity <= 0) {
-          items = cart.filter(i => i.id !== productId);
-        } else {
-          items = cart.map(i => i.id === productId ? { ...i, quantity } : i);
-        }
-        saveGuestCart(items);
-        setCart(items);
-      }
-    } catch (error) {
-      console.error('Failed to update cart:', error);
-      alert('Failed to update quantity. Please try again.');
-    }
-  }, [session?.user, cart]);
 
-  const removeFromCart = useCallback(async (productId: number) => {
-    try {
-      if (session?.user) {
-        await removeItemFromUserCart(session.user.id, productId);
-        await refetchCart();
-      } else {
-        const items = cart.filter(item => item.id !== productId);
-        saveGuestCart(items);
-        setCart(items);
-      }
-    } catch (error) {
-      console.error('Failed to remove from cart:', error);
-      alert('Failed to remove item. Please try again.');
-    }
-  }, [session?.user, cart]);
-
-  const clearCart = useCallback(async () => {
-    try {
-      if (session?.user) {
-        await clearUserCart(session.user.id);
-        await refetchCart();
-      } else {
-        clearGuestCart();
-        setCart([]);
-      }
-    } catch (error) {
-      console.error('Failed to clear cart:', error);
-      alert('Failed to clear cart. Please try again.');
-    }
-  }, [session?.user, cart]);
+   
 
   // Check database connection health
   const checkDatabaseConnection = async () => {
@@ -205,60 +95,15 @@ const refetchCart = async (userSession?: any) => {
 
   
   useEffect(() => {
-    let mounted = true;
-
-    const initializeApp = async () => {
-      try {
-        // Check database connection first
-        await checkDatabaseConnection();
-
-        // Get initial session
-        const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error('Error getting initial session:', sessionError);
-        } else if (mounted) {
-          setSession(initialSession);
-        }
-
-        // Set up auth state listener
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-          if (mounted) {
-            setSession(session);
-            // Whenever auth changes, refresh cart from appropriate source
-            await refetchCart(session);
-          }
-        });
-
-        if (mounted) {
-          // Initial cart load
-          await refetchCart();
-          setIsLoading(false);
-        }
-
-        return () => subscription.unsubscribe();
-      } catch (error) {
-        console.error('Error initializing app:', error);
-        if (mounted) {
-          setIsLoading(false);
-          setConnectionError('Failed to initialize application. Please refresh the page.');
-        }
-      }
-    };
-
-    initializeApp();
-
-    return () => {
-      mounted = false;
-    };
+    checkDatabaseConnection();
   }, []);
 
   // Retry connection when user clicks retry
   const handleRetryConnection = async () => {
-    setIsLoading(true);
+    setIsRetrying(true);
     setConnectionError(null);
     await checkDatabaseConnection();
-    setIsLoading(false);
+    setIsRetrying(false);
   };
 
   // Show loading or error state
@@ -286,11 +131,12 @@ const refetchCart = async (userSession?: any) => {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Connection Error</h2>
           <p className="text-gray-600 mb-6">{connectionError}</p>
           <button
-            onClick={handleRetryConnection}
-            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
-          >
-            Retry Connection
-          </button>
+  onClick={handleRetryConnection}
+  disabled={isRetrying}
+  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+>
+  {isRetrying ? 'Retrying...' : 'Retry Connection'}
+</button>
         </div>
       </div>
     );

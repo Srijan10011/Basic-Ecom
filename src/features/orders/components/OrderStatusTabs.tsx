@@ -8,18 +8,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { MapPin, Calendar } from 'lucide-react';
 import { AdminOrder } from '../../../lib/utils';
 import { formatOrderDate, getRelativeTime } from '../../../shared/utils/dateUtils';
-
+import { getStatusColor } from '../../../shared/utils/orderHelpers';
 interface OrderStatusTabsProps {
   orders: AdminOrder[];
   onStatusChange: (orderId: string, status: string, userId: string | null) => void;
-  getStatusColor: (status: string) => string;
 }
 
-const OrderStatusTabs: React.FC<OrderStatusTabsProps> = ({ 
-  orders, 
-  onStatusChange, 
-  getStatusColor 
-}) => {
+const OrderStatusTabs = ({ orders, onStatusChange }: OrderStatusTabsProps) => {
   const [currentPages, setCurrentPages] = React.useState({
     all: 1,
     pending: 1,
@@ -56,7 +51,8 @@ const OrderStatusTabs: React.FC<OrderStatusTabsProps> = ({
           <TableRow className="bg-gray-50 dark:bg-gray-700">
             <TableHead className="text-gray-700 dark:text-gray-200">Order #</TableHead>
             <TableHead className="text-gray-700 dark:text-gray-200">Customer</TableHead>
-            <TableHead className="text-gray-700 dark:text-gray-200">Items</TableHead>
+             <TableHead className="text-gray-700 dark:text-gray-200">Items</TableHead>
+            <TableHead className="text-gray-700 dark:text-gray-200">Payment Info</TableHead>
             <TableHead className="text-gray-700 dark:text-gray-200">Total</TableHead>
             <TableHead className="text-gray-700 dark:text-gray-200">Order Created Date</TableHead>
             <TableHead className="text-gray-700 dark:text-gray-200">Status</TableHead>
@@ -159,6 +155,30 @@ const OrderStatusTabs: React.FC<OrderStatusTabsProps> = ({
                         To display order items, add an 'items' JSONB field to your orders table or create an order_items table.
                       </p>
                     </div>
+                  )}
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="space-y-2 text-sm">
+                  {order.payment_reference_id && (
+                    <div>
+                      <span className="font-semibold text-gray-700 dark:text-gray-300">Ref ID:</span>
+                      <br />
+                      <span className="font-mono text-xs text-gray-600 dark:text-gray-400">{order.payment_reference_id}</span>
+                    </div>
+                  )}
+                  {order.payment_screenshot_url && (
+                    <a
+                      href={order.payment_screenshot_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors"
+                    >
+                      View Image
+                    </a>
+                  )}
+                  {!order.payment_reference_id && !order.payment_screenshot_url && (
+                    <span className="text-xs text-gray-400">No payment info</span>
                   )}
                 </div>
               </TableCell>

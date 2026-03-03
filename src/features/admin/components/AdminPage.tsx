@@ -24,7 +24,8 @@ import ProductViewDialog from '../../products/components/ProductViewDialog';
 import ProductCard from '../../products/components/ProductCard';
 import { createProduct, updateProduct } from '../../products/services/productService';
 import { updateOrderStatus } from '../../orders/services/orderService';
-
+import { getStatusColor } from '../../../shared/utils/orderHelpers';
+import { useAdminAuth } from '../hooks/useAdminAuth';
 // Mock API functions (replace with actual API calls)
 // Mock API functions (replace with actual API calls)
 const mockApiRequest = async (method: string, url: string, data?: any) => {
@@ -67,47 +68,8 @@ const AdminPage: React.FC<AdminPageProps> = ({ setCurrentPage }) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
-  // Mock authentication state
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
-  const [userRole, setUserRole] = useState<string | null>(null);
-    const [userId, setUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function checkUserAndRole() {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          setIsAuthenticated(true);
-          
-          setUserId(user.id);
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single();
-
-          if (profileError) {
-            console.error('Error fetching user role:', profileError);
-            setUserRole(null);
-          } else if (profileData) {
-            setUserRole(profileData.role);
-          }
-        } else {
-          setIsAuthenticated(false);
-          setUserRole(null);
-        }
-      } catch (error) {
-        console.error('Error checking user authentication:', error);
-        setIsAuthenticated(false);
-        setUserRole(null);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    checkUserAndRole();
-  }, []);
+    // Use admin auth hook
+  const { isAuthenticated, isLoading, userRole, userId, isAdmin } = useAdminAuth();
 
   // Use React Query for data fetching with automatic refetching
   const { 
@@ -241,16 +203,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ setCurrentPage }) => {
     updateOrderStatusMutation.mutate({ id: orderId, status });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'processing': return 'bg-blue-100 text-blue-800';
-      case 'shipped': return 'bg-purple-100 text-purple-800';
-      case 'delivered': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+
 
   // Product management handlers
   const handleEditProduct = (product: any) => {
@@ -625,7 +578,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ setCurrentPage }) => {
             <OrderStatusTabs 
               orders={orders}
               onStatusChange={handleStatusChange}
-              getStatusColor={getStatusColor}
+              
             />
           </TabsContent>
 
@@ -643,12 +596,25 @@ const AdminPage: React.FC<AdminPageProps> = ({ setCurrentPage }) => {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {products?.map((product: any) => (
-                      <ProductCard
-                        key={product.id}
-                        product={product}
-                        onEdit={handleEditProduct}
-                        onView={handleViewProduct}
-                      />
+                      <div key={product.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+  <img src={product.image} alt={product.name} className="w-full h-48 object-cover rounded mb-3" />
+  <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{product.name}</h3>
+  <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">Rs {product.price}</p>
+  <div className="flex gap-2">
+    <button
+      onClick={() => handleEditProduct(product)}
+      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm"
+    >
+      Edit
+    </button>
+    <button
+      onClick={() => handleViewProduct(product)}
+      className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded text-sm"
+    >
+      View
+    </button>
+  </div>
+</div>
                     ))}
                   </div>
                 )}
