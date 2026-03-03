@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ShoppingBag } from 'lucide-react';
 
-const OrderList = ({ orders }: { orders: any[] }) => (
+const OrderList = ({ orders, onCompletePayment }: { orders: any[], onCompletePayment?: (orderId: string) => void }) => (
   <div className="space-y-4">
     {orders.map((order) => (
       <div
@@ -12,7 +12,9 @@ const OrderList = ({ orders }: { orders: any[] }) => (
           <p className="font-semibold text-lg text-gray-900 dark:text-white">Order #{order.order_number}</p>
           <span
             className={`px-3 py-1 rounded-full text-sm font-medium ${
-              order.status === 'pending'
+              order.payment_status === 'awaiting_payment'
+                ? 'bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-200'
+                : order.status === 'pending'
                 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200'
                 : order.status === 'processing'
                 ? 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200'
@@ -23,7 +25,9 @@ const OrderList = ({ orders }: { orders: any[] }) => (
                 : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
             }`}
           >
-            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+            {order.payment_status === 'awaiting_payment' 
+              ? 'Awaiting Payment'
+              : order.status.charAt(0).toUpperCase() + order.status.slice(1)}
           </span>
         </div>
         <p className="text-gray-600 dark:text-gray-300 text-sm mb-2">
@@ -32,6 +36,11 @@ const OrderList = ({ orders }: { orders: any[] }) => (
         <p className="text-gray-800 dark:text-white font-bold text-xl mb-2">
           Total: Rs {parseFloat(order.total_amount).toFixed(2)}
         </p>
+        {order.payment_reference_id && (
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+            Reference ID: <span className="font-mono font-semibold text-orange-600 dark:text-orange-400">{order.payment_reference_id}</span>
+          </p>
+        )}
         <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
           <p className="font-medium text-gray-700 dark:text-gray-200">Items:</p>
           <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-300">
@@ -46,16 +55,28 @@ const OrderList = ({ orders }: { orders: any[] }) => (
             )}
           </ul>
         </div>
+        {order.payment_status === 'awaiting_payment' && onCompletePayment && (
+  <button
+    onClick={() => onCompletePayment(order.id)}
+    className="mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-semibold transition-colors"
+  >
+    Complete Payment
+  </button>
+)}
       </div>
     ))}
   </div>
 );
 
-const OrderTabs = ({ orders }: { orders: any[] }) => {  
-  const [activeTab, setActiveTab] = useState('pending');
+const OrderTabs = ({ orders, onCompletePayment }: { orders: any[], onCompletePayment?: (order: any) => void }) => {  
+  const [activeTab, setActiveTab] = useState('awaiting_payment');
+
+  const awaitingPaymentOrders = orders.filter(
+    (order) => order.payment_status === 'awaiting_payment'
+  );
 
   const pendingOrders = orders.filter(
-    (order) => order.status === 'pending' || order.status === 'processing'
+    (order) => (order.status === 'pending' || order.status === 'processing') && order.payment_status !== 'awaiting_payment'
   );
 
   const completedOrders = orders.filter(
@@ -64,10 +85,20 @@ const OrderTabs = ({ orders }: { orders: any[] }) => {
 
   return (
     <div>
-      <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4">
+      <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4 overflow-x-auto">
+        <button
+          onClick={() => setActiveTab('awaiting_payment')}
+          className={`px-4 py-2 font-medium text-sm whitespace-nowrap ${
+            activeTab === 'awaiting_payment'
+              ? 'border-b-2 border-orange-600 text-orange-600 dark:text-orange-400 dark:border-orange-400'
+              : 'text-gray-500 dark:text-gray-400'
+          }`}
+        >
+          Awaiting Payment ({awaitingPaymentOrders.length})
+        </button>
         <button
           onClick={() => setActiveTab('pending')}
-          className={`px-4 py-2 font-medium text-sm ${
+          className={`px-4 py-2 font-medium text-sm whitespace-nowrap ${
             activeTab === 'pending'
               ? 'border-b-2 border-green-600 text-green-600 dark:text-green-400 dark:border-green-400'
               : 'text-gray-500 dark:text-gray-400'
@@ -77,7 +108,7 @@ const OrderTabs = ({ orders }: { orders: any[] }) => {
         </button>
         <button
           onClick={() => setActiveTab('completed')}
-          className={`px-4 py-2 font-medium text-sm ${
+          className={`px-4 py-2 font-medium text-sm whitespace-nowrap ${
             activeTab === 'completed'
               ? 'border-b-2 border-green-600 text-green-600 dark:text-green-400 dark:border-green-400'
               : 'text-gray-500 dark:text-gray-400'
@@ -86,6 +117,16 @@ const OrderTabs = ({ orders }: { orders: any[] }) => {
           Completed ({completedOrders.length})
         </button>
       </div>
+
+      {activeTab === 'awaiting_payment' &&
+        (awaitingPaymentOrders.length > 0 ? (
+          <OrderList orders={awaitingPaymentOrders} onCompletePayment={onCompletePayment} />
+        ) : (
+          <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg text-center">
+            <ShoppingBag className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+            <p className="text-gray-600 dark:text-gray-300">No orders awaiting payment.</p>
+          </div>
+        ))}
 
       {activeTab === 'pending' &&
         (pendingOrders.length > 0 ? (

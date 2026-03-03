@@ -4,12 +4,14 @@ import { supabase } from '../../lib/supabaseClient';
 import { useProfileQuery, useUserOrdersQuery } from '../../lib/utils';
 import OrderTabs from '../../features/orders/components/OrderTabs';
 
-interface ProfileProps {
-  session: any;
-  setCurrentPage: (page: string) => void;
-}
+  interface ProfileProps {
+    session: any;
+    setCurrentPage: (page: string) => void;
+    setResumeOrderId: (id: string | null) => void;
+  }
 
-export default function Profile({ session, setCurrentPage }: ProfileProps) {
+
+export default function Profile({ session, setCurrentPage, setResumeOrderId }: ProfileProps) {
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
@@ -192,7 +194,14 @@ export default function Profile({ session, setCurrentPage }: ProfileProps) {
                 </p>
               </div>
             ) : (
-              <OrderTabs orders={orders} />
+              <OrderTabs
+  orders={orders}
+  onCompletePayment={(orderId) => {
+    // Need setResumeOrderId from App - pass as prop
+    setResumeOrderId(orderId);
+    setCurrentPage('checkout');
+  }}
+/>
             )}
           </div>
 

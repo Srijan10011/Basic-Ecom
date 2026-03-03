@@ -68,12 +68,12 @@ function App() {
     return savedTheme === 'dark' ? 'dark' : 'light';
   });
 const [addingToCartId, setAddingToCartId] = useState<number | null>(null);
+const [resumeOrderId, setResumeOrderId] = useState<string | null>(null);
   useEffect(() => {
     document.documentElement.classList.remove('light', 'dark');
     document.documentElement.classList.add(theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
-
   useEffect(() => {
     if (modal) {
       document.body.classList.add('overflow-hidden');
@@ -351,7 +351,11 @@ const refetchCart = async (userSession?: any) => {
         return (
           <div>
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
-            <Profile session={session} setCurrentPage={setCurrentPage} />
+            <Profile
+  session={session}
+  setCurrentPage={setCurrentPage}
+  setResumeOrderId={setResumeOrderId}
+/>
             <Footer setCurrentPage={setCurrentPage} />
           </div>
         );
@@ -375,7 +379,14 @@ const refetchCart = async (userSession?: any) => {
         return (
           <div>
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
-            <Checkout cart={cart} setCurrentPage={setCurrentPage} session={session} clearCart={clearCart} />
+            <Checkout
+  cart={cart}
+  setCurrentPage={setCurrentPage}
+  session={session}
+  clearCart={clearCart}
+  resumeOrderId={resumeOrderId}
+  setResumeOrderId={setResumeOrderId}
+/>
             <Footer setCurrentPage={setCurrentPage} />
           </div>
         );
