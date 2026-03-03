@@ -36,50 +36,53 @@ export default function PaymentDetailsDialog({
   };
 
   const handleSubmitPayment = async () => {
-    setIsSubmitting(true);
-    try {
-      let screenshotUrl = null;
+  setIsSubmitting(true);
+  try {
+    let screenshotUrl = null;
 
-      // Upload screenshot if provided
-      if (screenshot) {
-        const fileExt = screenshot.name.split('.').pop();
-        const fileName = `payment-${Date.now()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage
+    if (screenshot) {
+      const fileExt = screenshot.name.split('.').pop();
+      const fileName = `payment-${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('payment-screenshots')
+        .upload(fileName, screenshot);
+
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage
           .from('payment-screenshots')
-          .upload(fileName, screenshot);
-
-        if (!uploadError) {
-          const { data: urlData } = supabase.storage
-            .from('payment-screenshots')
-            .getPublicUrl(fileName);
-          screenshotUrl = urlData.publicUrl;
-        }
+          .getPublicUrl(fileName);
+        screenshotUrl = urlData.publicUrl;
       }
-
-      // UPDATE existing order to payment_submitted status
-      const { error } = await supabase
-        .from('orders')
-        .update({
-          payment_status: 'payment_submitted',
-          payment_method: paymentMethod,
-          payment_submitted_at: new Date().toISOString(),
-          payment_screenshot_url: screenshotUrl
-        })
-        .eq('id', orderId);
-
-      if (error) throw error;
-
-      alert('Payment submitted! Your order is being verified.');
-      await clearCart();
-      setCurrentPage('home');
-      onClose();
-    } catch (error: any) {
-      console.error('Error:', error);
-      alert(`Error: ${error.message}`);
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+
+    const { error } = await supabase
+      .from('orders')
+      .update({
+        payment_status: 'payment_submitted',
+        payment_method: paymentMethod,
+        payment_submitted_at: new Date().toISOString(),
+        payment_screenshot_url: screenshotUrl
+      })
+      .eq('id', orderId);
+
+    if (error) throw error;
+
+    // Invalidate orders query cache
+    if (typeof window !== 'undefined' && (window as any).queryClient) {
+      (window as any).queryClient.invalidateQueries(['userOrders']);
+    }
+
+    alert('Payment submitted! Your order is being verified.');
+    await clearCart();
+    setCurrentPage('home');
+    onClose();
+  } catch (error: any) {
+    console.error('Error:', error);
+    alert(`Error: ${error.message}`);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

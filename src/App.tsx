@@ -45,9 +45,9 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       retryDelay: 1000,
-      staleTime: 10 * 60 * 1000, // 10 minutes
+      staleTime: 5 * 60 * 1000, // 5 minutes
       refetchOnWindowFocus: false,
-      refetchOnReconnect: true,
+      refetchOnReconnect: false,
       refetchOnMount: false,
     },
   },
@@ -201,16 +201,7 @@ const refetchCart = async (userSession?: any) => {
       setConnectionError('Database connection error. Please refresh the page.');
     }
   };
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden && session?.user) {
-        refetchCart(); // Refetch when tab becomes visible
-      }
-    };
   
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [session?.user]);
 
   
   useEffect(() => {
