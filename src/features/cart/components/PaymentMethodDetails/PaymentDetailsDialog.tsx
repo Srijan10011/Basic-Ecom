@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../../shared/components/ui/dialog';
 import { paymentConfigs } from '../../../../constants/paymentConfig';
+import PaymentSuccessDialog from '../../../../shared/components/ui/PaymentSuccessDialog';
 import { supabase } from '../../../../lib/supabaseClient';
-
 interface PaymentDetailsDialogProps {
   open: boolean;
   onClose: () => void;
@@ -12,6 +12,8 @@ interface PaymentDetailsDialogProps {
   paymentReferenceId: string;
   clearCart: () => void | Promise<void>;
   setCurrentPage: (page: string) => void;
+  setTrackOrderId: (id: string) => void;
+  orderNumber: string;
 }
 
 export default function PaymentDetailsDialog({
@@ -22,11 +24,13 @@ export default function PaymentDetailsDialog({
   amount,
   paymentReferenceId,
   clearCart,
-  setCurrentPage
+  setCurrentPage,
+  setTrackOrderId,
+  orderNumber,
 }: PaymentDetailsDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [screenshot, setScreenshot] = useState<File | null>(null);
-
+const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const config = paymentConfigs[paymentMethod];
   if (!config) return null;
 
@@ -84,11 +88,9 @@ export default function PaymentDetailsDialog({
     if (typeof window !== 'undefined' && (window as any).queryClient) {
       (window as any).queryClient.invalidateQueries(['userOrders']);
     }
-
-    alert('Payment submitted! Your order is being verified.');
-    await clearCart();
-    setCurrentPage('home');
-    onClose();
+await clearCart();
+    setShowSuccessDialog(true);
+    
   } catch (error: any) {
     console.error('Error:', error);
     alert(`Error: ${error.message}`);
@@ -102,82 +104,110 @@ export default function PaymentDetailsDialog({
       <DialogContent className="sm:max-w-sm bg-white dark:bg-gray-800 p-4">
         <DialogHeader className="mb-3">
           <DialogTitle className="text-lg font-bold">
-            {paymentMethod === 'esewa' ? 'eSewa' : 'Khalti'} Payment
+           {config.id.charAt(0).toUpperCase() + config.id.slice(1)} Payment
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3">
-          <div className="text-center">
-            <p className="text-xs text-gray-600 dark:text-gray-400">Amount</p>
+          {/* Top bar with amount and badge */}
+          <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-700">
             <p className="text-2xl font-bold text-gray-900 dark:text-white">Rs {amount.toFixed(2)}</p>
+            <span className="px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full">
+                {config.id.charAt(0).toUpperCase() + config.id.slice(1)}
+            </span>
           </div>
 
-          <div className="flex justify-center bg-gray-100 dark:bg-gray-700 p-2 rounded">
-            <img src={config.qrCodeUrl} alt="QR Code" className="w-32 h-32" />
-          </div>
-
-          <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded text-sm">
-            <div>
-              <p className="text-xs text-gray-600 dark:text-gray-400">
-                {paymentMethod === 'esewa' ? 'eSewa ID' : 'Khalti'}
-              </p>
-              <p className="font-semibold text-gray-900 dark:text-white">{config.accountId}</p>
+          {/* Content flex: QR + Details */}
+          <div className="flex gap-3">
+            {/* QR Box */}
+            <div className="flex-shrink-0">
+              <div className="w-28 h-28 bg-gray-100 dark:bg-gray-700 rounded-lg p-2 border-2 border-gray-200 dark:border-gray-600">
+                <img src={config.qrCodeUrl} alt="QR Code" className="w-full h-full object-contain" />
+              </div>
             </div>
-            <button
-              onClick={() => handleCopy(config.accountId)}
-              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-sm"
-            >
-              📋
-            </button>
-          </div>
 
-          <div className="p-2 bg-orange-50 dark:bg-orange-900/20 border border-orange-500 rounded">
-            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Reference ID</p>
-            <div className="flex items-center justify-between">
-              <p className="text-lg font-bold text-orange-600 dark:text-orange-400">{paymentReferenceId}</p>
-              <button
-                onClick={() => handleCopy(paymentReferenceId)}
-                className="p-1 hover:bg-orange-100 dark:hover:bg-orange-800 rounded text-sm"
-              >
-                📋
-              </button>
+            {/* Details Box */}
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                <div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                   {config.id.charAt(0).toUpperCase() + config.id.slice(1)} ID
+                  </p>
+                  <p className="font-semibold text-gray-900 dark:text-white text-sm">{config.accountId}</p>
+                </div>
+                <button
+                  onClick={() => handleCopy(config.accountId)}
+                  className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-sm"
+                >
+                  📋
+                </button>
+              </div>
+
+              <div className="p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+                  Reference ID<br/>(Must include in remarks):
+                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-bold text-gray-900 dark:text-white break-all">{paymentReferenceId}</p>
+                  <button
+                    onClick={() => handleCopy(paymentReferenceId)}
+                    className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-sm ml-1"
+                  >
+                    📋
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="p-2 bg-red-50 dark:bg-red-900/20 border border-red-500 rounded text-xs text-red-700 dark:text-red-300">
-            <p className="font-semibold mb-1">⚠️ IMPORTANT:</p>
-            <p>Add Reference ID in payment remarks to verify your order</p>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Upload Screenshot (Optional)
-            </label>
+          {/* Upload section */}
+          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-3 text-center">
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">📎 Upload Screenshot</p>
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setScreenshot(e.target.files?.[0] || null)}
-              className="block w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+              className="block w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 dark:file:bg-gray-700 dark:file:text-gray-300"
             />
           </div>
 
-          <div className="flex gap-2">
+          {/* Action buttons */}
+          <div className="grid grid-cols-2 gap-2">
             <button
               onClick={handleSubmitPayment}
               disabled={isSubmitting}
-              className="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white py-2 rounded text-sm font-semibold transition-colors"
+              className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white py-2 rounded text-sm font-semibold transition-colors"
             >
               {isSubmitting ? 'Submitting...' : 'I have paid'}
             </button>
             <button
               onClick={onClose}
-              className="flex-1 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white py-2 rounded text-sm font-semibold transition-colors"
+              className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-white py-2 rounded text-sm font-semibold transition-colors"
             >
               Cancel
             </button>
           </div>
         </div>
       </DialogContent>
+      <PaymentSuccessDialog
+        open={showSuccessDialog}
+        onClose={() => {
+          setShowSuccessDialog(false);
+          onClose(); // Close payment dialog
+          setCurrentPage('home');
+        }}
+        onViewProfile={() => {
+          setShowSuccessDialog(false);
+          onClose(); // Close payment dialog
+          setCurrentPage('profile');
+        }}
+        onTrackOrder={() => {
+  setShowSuccessDialog(false);
+  onClose();
+  setTrackOrderId(orderNumber);
+  setCurrentPage('track-order');
+}}
+      />
     </Dialog>
   );
 }

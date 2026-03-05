@@ -9,7 +9,7 @@ export const useOrderTrackingQuery = (orderId: string) => {
             const { data, error } = await supabase
                 .from("orders")
                 .select("*, customer_detail!customer_detail_id(*), guest_order(*)")
-                .eq("id", orderId)
+                .eq("order_number", orderId)
                 .single();
 
             if (error) throw error;

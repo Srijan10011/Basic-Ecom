@@ -1,11 +1,12 @@
-import React from 'react';
+
 import { Check, Users, Award, Leaf, Heart, Globe } from 'lucide-react';
 
 const certifications = [
   '100% Organic Certification',
   'Sustainable Farming Practices',
   'Fresh Harvest Guarantee',
-  'Expert Cultivation Support'
+  'Expert Cultivation Support',
+  
 ];
 
 const stats = [
@@ -13,13 +14,14 @@ const stats = [
   { number: '10,000+', label: 'Happy Customers' },
   { number: '50+', label: 'Mushroom Varieties' },
   { number: '100%', label: 'Organic Certified' }
+  
 ];
 
 const teamMembers = [
   {
     name: 'Sarah Mitchell',
-    role: 'Founder & Head Cultivator',
-    initials: 'SM',
+    role: 'Founder & Head Cultivator OOh yea',
+    initials: 'PM',
     description: 'With over 25 years in organic farming, Sarah founded FreshShroom with a vision to bring premium mushrooms to every table.'
   },
   {
@@ -39,8 +41,8 @@ const teamMembers = [
 const values = [
   {
     icon: <Leaf className="h-8 w-8 text-green-600" />,
-    title: 'Sustainability First',
-    description: 'We believe in farming practices that regenerate the soil and protect our environment for future generations.'
+    title: 'Sustainability First Really',
+    description: 'We really believe in farming practices that regenerate the soil and protect our environment for future generations.'
   },
   {
     icon: <Heart className="h-8 w-8 text-green-600" />,

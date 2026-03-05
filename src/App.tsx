@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import  { useState, useEffect } from 'react';
 import Header from './shared/components/Header';
 import Hero from './shared/components/Hero';
 import Features from './shared/components/Features';
@@ -19,12 +19,11 @@ import UpdateProfile from './shared/components/UpdateProfile';
 import Cart from './features/cart/components/Cart';
 import Checkout from './features/cart/components/Checkout';
 import AdminPage from './features/admin/components/AdminPage';
-import { useVisibilityRefetch } from './lib/utils';
 import { Toaster as SonnerToaster } from 'sonner';
 import { useTheme } from './features/theme/hooks/useTheme';
 import { useAuth } from './features/auth/hooks/useAuth';
 import { useCart } from './features/cart/hooks/useCart';
-import { supabase, checkConnection } from './lib/supabaseClient';
+import { checkConnection } from './lib/supabaseClient';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from './shared/components/ui/toaster';
@@ -52,6 +51,7 @@ function App() {
   const [modal, setModal] = useState<'login' | 'signup' | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const [resumeOrderId, setResumeOrderId] = useState<string | null>(null);
+  const [trackOrderId, setTrackOrderId] = useState<string | null>(null);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
   // Custom Hooks
@@ -172,8 +172,7 @@ function App() {
         return (
           <div>
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
-            <TrackOrder />
-            <Footer setCurrentPage={setCurrentPage} />
+<TrackOrder prefilledOrderId={trackOrderId} />            <Footer setCurrentPage={setCurrentPage} />
           </div>
         );
       case 'product-detail':
@@ -223,6 +222,7 @@ function App() {
   clearCart={clearCart}
   resumeOrderId={resumeOrderId}
   setResumeOrderId={setResumeOrderId}
+  setTrackOrderId={setTrackOrderId}
 />
             <Footer setCurrentPage={setCurrentPage} />
           </div>

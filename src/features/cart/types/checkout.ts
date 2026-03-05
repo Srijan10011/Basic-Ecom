@@ -47,6 +47,7 @@ export interface PaymentFlowState {
   currentOrderId: string | null;
   paymentReferenceId: string | null;
   currentOrderAmount: string | null;
+  currentOrderNumber: string | null;
 }
 
 export interface GuestSession {

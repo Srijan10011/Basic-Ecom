@@ -3,8 +3,8 @@ import { supabase, checkConnection } from '../../lib/supabaseClient';
 import { useProfileQuery } from '../../lib/utils';
 
 import { ShoppingCart, User, Menu, X, Wifi, WifiOff, Leaf, Sun, Moon } from 'lucide-react';
-
-interface HeaderProps {
+  
+interface HeaderProps  {
   currentPage?: string;
   setCurrentPage: (page: string) => void;
   setModal: (modal: 'login' | 'signup' | null) => void;

@@ -78,13 +78,16 @@ export default function GuestOrderAccess({ setCurrentPage }: GuestOrderAccessPro
       }));
 
       // Update localStorage with potentially new statuses
+      // Update localStorage with potentially new statuses
+      // Update localStorage with potentially new statuses
       localStorage.setItem('guestSessions', JSON.stringify(updatedSessions));
 
-      setGuestSessions(updatedSessions);
+      // Sort by order date descending (newest first)
+      const sortedSessions = updatedSessions.sort((a, b) =>
+        new Date(b.orderData.order_date).getTime() - new Date(a.orderData.order_date).getTime()
+      );
 
-      if (updatedSessions.length > 0) {
-        setCurrentSession(updatedSessions[0]);
-      }
+      setGuestSessions(sortedSessions);
       setLoading(false);
     };
 
@@ -125,7 +128,7 @@ export default function GuestOrderAccess({ setCurrentPage }: GuestOrderAccessPro
     if (filteredOrders.length === 0) {
       return (
         <div className="text-center py-8">
-          <p className="text-gray-500">{emptyMessage}</p>
+          <p className="text-gray-500 dark:text-gray-400">{emptyMessage}</p>
         </div>
       );
     }
@@ -133,38 +136,38 @@ export default function GuestOrderAccess({ setCurrentPage }: GuestOrderAccessPro
     return (
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead>Order #</TableHead>
-            <TableHead>Customer</TableHead>
-            <TableHead>Items</TableHead>
-            <TableHead>Total</TableHead>
-            <TableHead>Order Date</TableHead>
-            <TableHead>Status</TableHead>
+         <TableRow className="bg-gray-50 dark:bg-gray-700">
+            <TableHead className="text-gray-700 dark:text-gray-200">Order #</TableHead>
+<TableHead className="text-gray-700 dark:text-gray-200">Customer</TableHead>
+<TableHead className="text-gray-700 dark:text-gray-200">Items</TableHead>
+<TableHead className="text-gray-700 dark:text-gray-200">Total</TableHead>
+<TableHead className="text-gray-700 dark:text-gray-200">Order Date</TableHead>
+<TableHead className="text-gray-700 dark:text-gray-200">Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {filteredOrders.map((session) => (
-            <TableRow key={session.orderId}>
-              <TableCell className="font-medium">
+            <TableRow key={session.orderId} className="dark:border-gray-700">
+            <TableCell className="font-medium dark:text-gray-200">
                 #{session.orderNumber}
               </TableCell>
               <TableCell>
                 <div>
-                  <p className="font-medium text-blue-600">
+                  <p className="font-medium text-blue-600 dark:text-blue-400">
                     {session.customerName} (Guest)
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     {session.customerEmail}
                   </p>
                   {session.orderData.shipping_address && (
                     <>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
                         {session.orderData.shipping_address.phone}
                       </p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
                         {session.orderData.shipping_address.address}
                       </p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
                         {session.orderData.shipping_address.city}, {session.orderData.shipping_address.state} {session.orderData.shipping_address.zipCode}
                       </p>
                       {session.orderData.shipping_address.latitude && session.orderData.shipping_address.longitude && (
@@ -173,7 +176,7 @@ export default function GuestOrderAccess({ setCurrentPage }: GuestOrderAccessPro
                             href={`https://maps.google.com/?q=${session.orderData.shipping_address.latitude},${session.orderData.shipping_address.longitude}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center text-blue-600 hover:text-blue-800 underline"
+                           className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
                           >
                             <MapPin className="h-3 w-3 mr-1" />
                             View on Google Maps
@@ -190,23 +193,23 @@ export default function GuestOrderAccess({ setCurrentPage }: GuestOrderAccessPro
                     ? JSON.parse(session.orderData.items)
                     : session.orderData.items
                   ).map((item: any, idx: number) => (
-                    <div key={idx} className="text-sm">
+                    <div key={idx} className="text-sm dark:text-gray-300">
                       <p>{item.name} (x{item.quantity})</p>
-                      {item.price && <p className="text-xs text-gray-500">Rs {item.price}</p>}
+                      {item.price && <p className="text-xs text-gray-500 dark:text-gray-400">Rs {item.price}</p>}
                     </div>
                   ))}
                 </div>
               </TableCell>
-              <TableCell className="font-semibold">
+              <TableCell className="font-semibold dark:text-gray-200">
                 Rs {parseFloat(session.orderData.total_amount).toFixed(2)}
               </TableCell>
               <TableCell>
                 <div className="flex flex-col">
-                  <div className="flex items-center text-sm font-medium text-gray-900">
-                    <Calendar className="h-4 w-4 mr-2 text-gray-500" />
+                  <div className="flex items-center text-sm font-medium text-gray-900 dark:text-gray-200">
+                    <Calendar className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
                     {formatOrderDate(session.orderData.order_date)}
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {getRelativeTime(session.orderData.order_date)}
                   </div>
                 </div>
@@ -225,21 +228,21 @@ export default function GuestOrderAccess({ setCurrentPage }: GuestOrderAccessPro
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 py-12 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-        <p className="ml-4 text-gray-600">Loading guest orders...</p>
+       <p className="ml-4 text-gray-600 dark:text-gray-300">Loading guest orders...</p>
       </div>
     );
   }
 
   if (guestSessions.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-100 py-12">
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
-            <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-800 mb-4">No Guest Orders</h1>
-            <p className="text-gray-600 mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
+            <Package className="h-16 w-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">No Guest Orders</h1>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
               You haven't placed any orders as a guest user yet.
             </p>
             <button
@@ -258,23 +261,23 @@ export default function GuestOrderAccess({ setCurrentPage }: GuestOrderAccessPro
   // If the user wants to re-introduce session expiration, this block should be re-added.
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <Card>
           <CardHeader>
-            <CardTitle>Guest Order Access</CardTitle>
+            <CardTitle className="dark:text-white">Guest Order Access</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between mb-6">
-              <h1 className="text-3xl font-bold text-gray-800"></h1>
+              <h1 className="text-3xl font-bold text-gray-800 dark:text-white"></h1>
             </div>
 
             <Tabs defaultValue="pending" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="pending">
+              <TabsList className="grid w-full grid-cols-2 dark:bg-gray-700">
+                <TabsTrigger value="pending" className="dark:text-gray-300 dark:data-[state=active]:bg-gray-800 dark:data-[state=active]:text-white">
                   Pending Orders ({pendingGuestOrders.length})
                 </TabsTrigger>
-                <TabsTrigger value="delivered">
+                <TabsTrigger value="delivered" className="dark:text-gray-300 dark:data-[state=active]:bg-gray-800 dark:data-[state=active]:text-white">
                   Delivered Orders ({deliveredGuestOrders.length})
                 </TabsTrigger>
               </TabsList>

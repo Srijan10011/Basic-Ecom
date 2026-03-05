@@ -3,12 +3,21 @@ import { PackageSearch, RefreshCw, CalendarDays } from 'lucide-react';
 import { supabase } from '../../../lib/supabaseClient';
 import { useOrderTrackingQuery } from '../hooks/useOrderTrackingQuery';
 import { getStatusColor } from '../../../shared/utils/orderHelpers';
-export default function TrackOrder() {
-  const [orderId, setOrderId] = useState('');
+interface TrackOrderProps {
+  prefilledOrderId?: string | null;
+}
+
+export default function TrackOrder({ prefilledOrderId }: TrackOrderProps = { prefilledOrderId: null }) {
+  const [orderId, setOrderId] = useState(prefilledOrderId || '');
   const [orderStatus, setOrderStatus] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isTracking, setIsTracking] = useState(false);
-
+// Auto-submit if prefilled
+React.useEffect(() => {
+  if (prefilledOrderId) {
+    handleTrackOrder(new Event('submit') as any);
+  }
+}, [prefilledOrderId]);
  
 
   // Use React Query for data fetching with automatic refetching
@@ -131,7 +140,7 @@ export default function TrackOrder() {
                         }
                       </td>
                   </td>
-                  <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-gray-900 dark:text-white md:table-cell"><span className="font-bold md:hidden">Total: </span>{order.total_amount ? `Rs {parseFloat(order.total_amount).toFixed(2)}` : 'Rs 0.00'}</td>
+                  <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-gray-900 dark:text-white md:table-cell"><span className="font-bold md:hidden">Total: </span>Rs {order.total_amount ? parseFloat(order.total_amount).toFixed(2) : '0.00'}</td>
                   <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 md:table-cell">
                     <div className="flex items-center gap-2">
                       <CalendarDays className="w-4 h-4 text-gray-500 dark:text-gray-400" />

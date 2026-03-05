@@ -40,6 +40,12 @@ export const usePaymentFlow = () => {
       currentOrderAmount: amount,
     }));
   };
+  const setOrderNumber = (orderNumber: string) => {
+    setState(prev => ({
+      ...prev,
+      currentOrderNumber: orderNumber,
+    }));
+  };
 
   const reset = () => {
     setState({
@@ -49,6 +55,7 @@ export const usePaymentFlow = () => {
       currentOrderId: null,
       paymentReferenceId: null,
       currentOrderAmount: null,
+      currentOrderNumber: null,
     });
   };
 
@@ -60,5 +67,6 @@ export const usePaymentFlow = () => {
     closePaymentDetailsDialog,
     setOrderInfo,
     reset,
+    setOrderNumber,
   };
 };

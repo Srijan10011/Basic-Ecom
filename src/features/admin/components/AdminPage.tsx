@@ -25,6 +25,7 @@ import ProductCard from '../../products/components/ProductCard';
 import { createProduct, updateProduct } from '../../products/services/productService';
 import { updateOrderStatus } from '../../orders/services/orderService';
 import { getStatusColor } from '../../../shared/utils/orderHelpers';
+import AddProductDialog from './AddProductDialog';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 // Mock API functions (replace with actual API calls)
 // Mock API functions (replace with actual API calls)
@@ -67,7 +68,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ setCurrentPage }) => {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-
+  
     // Use admin auth hook
   const { isAuthenticated, isLoading, userRole, userId, isAdmin } = useAdminAuth();
 
@@ -319,189 +320,16 @@ const AdminPage: React.FC<AdminPageProps> = ({ setCurrentPage }) => {
         </div>
 
         <div className="flex justify-end mb-4">
-          <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
-            <DialogTrigger asChild>
-              <Button>Add New Product</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white">
-              <DialogHeader>
-                <DialogTitle>Add New Product</DialogTitle>
-                <DialogDescription className="text-gray-600 dark:text-gray-300">Fill in the product details below and click Add Product to save.</DialogDescription>
-              </DialogHeader>
-              <Form {...productForm}>
-                <form onSubmit={productForm.handleSubmit(onSubmitProduct)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={productForm.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-gray-700 dark:text-gray-200">Product Name</FormLabel>
-                          <FormControl>
-                            <Input {...field} className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={productForm.control}
-                      name="category"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-gray-700 dark:text-gray-200">Category</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600">
-                                <SelectValue placeholder="Select a category" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600">
-                              {categories?.map((category) => (
-                                <SelectItem key={category.id} value={category.id}>
-                                  {category.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={productForm.control}
-                      name="rating"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-gray-700 dark:text-gray-200">Rating</FormLabel>
-                          <FormControl>
-                            <Input type="number" step="0.1" min="0" max="5" {...field} className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={productForm.control}
-                      name="reviews"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-gray-700 dark:text-gray-200">Number of Reviews</FormLabel>
-                          <FormControl>
-                            <Input type="number" min="0" {...field} className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={productForm.control}
-                      name="badge"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-gray-700 dark:text-gray-200">Badge Text</FormLabel>
-                          <FormControl>
-                            <Input {...field} className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={productForm.control}
-                      name="badgeColor"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-gray-700 dark:text-gray-200">Badge Color</FormLabel>
-                          <FormControl>
-                            <Input {...field} className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={productForm.control}
-                      name="product_owner_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-gray-700 dark:text-gray-200">Product Owner ID</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Enter UUID of product owner" className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <FormField
-                    control={productForm.control}
-                    name="price"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-gray-700 dark:text-gray-200">Price</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" {...field} className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={productForm.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-gray-700 dark:text-gray-200">Full Description</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={productForm.control}
-                    name="details"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-gray-700 dark:text-gray-200">Product Details</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <div className="grid grid-cols-3 gap-4">
-                    
-                  </div>
-                  
-                  <FormField
-                    control={productForm.control}
-                    name="image"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-gray-700 dark:text-gray-200">Image URL</FormLabel>
-                        <FormControl>
-                          <Input {...field} className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex justify-end">
-                    <Button type="submit" disabled={addProductMutation.isPending}>
-                      {addProductMutation.isPending ? 'Adding...' : 'Add Product'}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-        </div>
+  <Button onClick={() => setIsAddProductOpen(true)} className="dark:text-white">Add New Product</Button>
+</div>
+
+<AddProductDialog
+  open={isAddProductOpen}
+  onOpenChange={setIsAddProductOpen}
+  productForm={productForm}
+  onSubmit={onSubmitProduct}
+  categories={categories}
+/>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

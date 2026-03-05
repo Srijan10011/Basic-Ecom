@@ -245,33 +245,43 @@ export const useAdminOrdersQuery = (enabled: boolean = true) => {
           throw ordersError;
         }
 
-        // Explicitly fetch guest order details for orders with no user_id
-        const ordersWithGuestDetails: AdminOrder[] = await Promise.all((orders || []).map(async (order) => {
-          if (!order.user_id) {
-            const { data: guestOrderData, error: guestOrderError } = await supabase
-              .from("guest_order")
-              .select(`
-                id,
-                order_id,
-                customer_name,
-                shipping_address,
-                customer_email,
-                created_at
-              `)
-              .eq("order_id", order.id)
-              .single();
+        // Get all guest order IDs in one query
+        const guestOrderIds = (orders || [])
+          .filter(order => !order.user_id)
+          .map(order => order.id);
 
-            if (guestOrderError && guestOrderError.code !== "PGRST116") { // PGRST116 = no rows found
-              // Optionally, you can throw the error or handle it differently
-            }
+        let guestOrdersMap = new Map();
 
+        if (guestOrderIds.length > 0) {
+          const { data: guestOrders, error: guestOrderError } = await supabase
+            .from("guest_order")
+            .select(`
+              id,
+              order_id,
+              customer_name,
+              shipping_address,
+              customer_email,
+              created_at
+            `)
+            .in("order_id", guestOrderIds);
+
+          if (!guestOrderError && guestOrders) {
+            guestOrders.forEach(guestOrder => {
+              guestOrdersMap.set(guestOrder.order_id, guestOrder);
+            });
+          }
+        }
+
+        // Attach guest order data to orders
+        const ordersWithGuestDetails: AdminOrder[] = (orders || []).map(order => {
+          if (!order.user_id && guestOrdersMap.has(order.id)) {
             return {
               ...order,
-              guest_order: guestOrderData || undefined, // Attach guest order data if found
+              guest_order: guestOrdersMap.get(order.id),
             };
           }
           return order;
-        }));
+        });
 
         // Since order_items table doesn't exist, we'll work with the orders table directly
         // Check if orders have an 'items' field or similar that might contain order details

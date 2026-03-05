@@ -29,5 +29,18 @@ export const paymentConfigs: Record<string, PaymentMethodConfig> = {
             'Complete the payment',
             'Click "I have paid" button below'
         ]
-    }
+    },
+
+    yoo: {
+        id: 'yoo',
+        accountId: '9876543210',
+        qrCodeUrl: '/images/yoo-qr.png',
+        instructions: [
+            'Scan QR code or send to yoo number above',
+            'Enter the exact amount shown',
+            '⚠️ IMPORTANT: Add the Payment Reference ID in remarks/description',
+            'Complete the payment',
+            'Click "I have paid" button below'
+        ]
+    },
 };
