@@ -27,6 +27,7 @@ import { updateOrderStatus } from '../../orders/services/orderService';
 import { getStatusColor } from '../../../shared/utils/orderHelpers';
 import AddProductDialog from './AddProductDialog';
 import { useAdminAuth } from '../hooks/useAdminAuth';
+
 // Mock API functions (replace with actual API calls)
 // Mock API functions (replace with actual API calls)
 const mockApiRequest = async (method: string, url: string, data?: any) => {
