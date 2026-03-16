@@ -34,6 +34,7 @@ interface ProductEditDialogProps {
   categories: any[];
   isOpen: boolean;
   onClose: () => void;
+  userId: string;
 }
 
 const ProductEditDialog: React.FC<ProductEditDialogProps> = ({
@@ -41,6 +42,7 @@ const ProductEditDialog: React.FC<ProductEditDialogProps> = ({
   categories,
   isOpen,
   onClose,
+  userId,
 }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -78,7 +80,7 @@ const ProductEditDialog: React.FC<ProductEditDialogProps> = ({
         details: updatedProduct.details ? [updatedProduct.details] : [],
         stockquantity: updatedProduct.stockquantity ?? 0,
         product_owner_id: updatedProduct.product_owner_id,
-      });
+      }, userId);
     },
     onSuccess: () => {
       toast({

@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../../sh
 import { paymentConfigs } from '../../../../constants/paymentConfig';
 import PaymentSuccessDialog from '../../../../shared/components/ui/PaymentSuccessDialog';
 import { supabase } from '../../../../lib/supabaseClient';
+import { sanitizeUrl } from '../../../../lib/sanitize';
 interface PaymentDetailsDialogProps {
   open: boolean;
   onClose: () => void;
@@ -73,21 +74,19 @@ const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
     console.log('💾 Updating order with screenshot URL:', screenshotUrl);
     const { error } = await supabase
-      .from('orders')
-      .update({
-        payment_status: 'payment_submitted',
-        payment_method: paymentMethod,
-        payment_submitted_at: new Date().toISOString(),
-        payment_screenshot_url: screenshotUrl
-      })
-      .eq('id', orderId);
+  .from('orders')
+  .update({
+    payment_status: 'payment_submitted',
+    payment_method: paymentMethod,
+    payment_submitted_at: new Date().toISOString(),
+    payment_screenshot_urldone: screenshotUrl ? sanitizeUrl(screenshotUrl) : null,
+  })
+  .eq('id', orderId);
 
     if (error) throw error;
 
     // Invalidate orders query cache
-    if (typeof window !== 'undefined' && (window as any).queryClient) {
-      (window as any).queryClient.invalidateQueries(['userOrders']);
-    }
+    
 await clearCart();
     setShowSuccessDialog(true);
     

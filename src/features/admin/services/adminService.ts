@@ -1,8 +1,26 @@
 import { supabase } from '../../../lib/supabaseClient';
 import { AdminOrder, OrderItem } from '../../../lib/utils';
 
+// Authorization helper function
+export const verifyAdminRole = async (userId: string): Promise<boolean> => {
+    const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
+
+    if (error || profile?.role !== 'admin') {
+        return false;
+    }
+    return true;
+}
+
 export const adminService = {
-    async fetchAdminOrders(): Promise<AdminOrder[]> {
+    async fetchAdminOrders(userId: string): Promise<AdminOrder[]> {
+        if (!await verifyAdminRole(userId)) {
+            throw new Error('Unauthorized: Admin access required');
+        }
+
         const { data: orders, error } = await supabase
             .from("orders")
             .select(`
@@ -61,19 +79,28 @@ export const adminService = {
         });
     },
 
-    async fetchAdminProducts() {
+    async fetchAdminProducts(userId: string) {
+        if (!await verifyAdminRole(userId)) {
+            throw new Error('Unauthorized: Admin access required');
+        }
         const { data, error } = await supabase.from("products").select("*");
         if (error) throw error;
         return data;
     },
 
-    async fetchCategories() {
+    async fetchCategories(userId: string) {
+        if (!await verifyAdminRole(userId)) {
+            throw new Error('Unauthorized: Admin access required');
+        }
         const { data, error } = await supabase.from("categories").select("*");
         if (error) throw error;
         return data;
     },
 
-    async updateOrderStatus(orderId: string, status: string) {
+    async updateOrderStatus(orderId: string, status: string, userId: string) {
+        if (!await verifyAdminRole(userId)) {
+            throw new Error('Unauthorized: Admin access required');
+        }
         const { data, error } = await supabase
             .from("orders")
             .update({ status })

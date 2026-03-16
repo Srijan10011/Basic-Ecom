@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabaseClient';
 
-export const useTotalCustomersQuery = (enabled: boolean) => {
+export const useTotalCustomersQuery = (enabled: boolean, userId: string | null = null) => {
   return useQuery({
-    queryKey: ['totalCustomers'],
+    queryKey: ['totalCustomers', userId],
     enabled,
     queryFn: async () => {
       const [{ count: guestCount, error: guestErr }, { data, error: ordErr }] = await Promise.all([

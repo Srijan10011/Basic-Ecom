@@ -2,7 +2,7 @@ import { supabase } from '../../../lib/supabaseClient';
 import { OrderData, CartItem, CheckoutFormData, GuestSession } from '../types/checkout';
 import { generatePaymentReference } from '../../../shared/utils/paymentHelpers';
 import { parseLocation } from './locationService';
-
+import { sanitizeInput, sanitizeEmail, sanitizeUrl } from '../../../lib/sanitize';
 export const fetchOrderDetails = async (orderId: string): Promise<{
   order: OrderData;
   reconstructedCart: CartItem[];
@@ -89,18 +89,17 @@ export const createOrder = async (
   };
 
   const customerInfo = {
-    customer_name: `${form.firstName} ${form.lastName}`.trim() || 'Guest',
+    customer_name: sanitizeInput(`${form.firstName} ${form.lastName}`.trim() || 'Guest', 100),
     shipping_address: {
-      phone: form.phone,
-      address: form.address,
-      city: form.city,
-      state: form.state,
+      phone: sanitizeInput(form.phone, 20),
+      address: sanitizeInput(form.address, 200),
+      city: sanitizeInput(form.city, 50),
+      state: sanitizeInput(form.state, 50),
       zipCode: '',
       latitude: lat,
       longitude: lng,
     },
   };
-
   // Handle authenticated user
   if (currentUser) {
     await supabase.from('user_addresses').upsert(
@@ -141,15 +140,14 @@ export const createOrder = async (
         order_id: data[0].id,
         customer_name: customerInfo.customer_name,
         shipping_address: customerInfo.shipping_address,
-        customer_email: form.email,
-        created_at: new Date().toISOString(),
+        customer_email: sanitizeEmail(form.email), created_at: new Date().toISOString(),
       },
     ]);
 
     const guestSession: GuestSession = {
       orderId: data[0].id,
       orderNumber: orderData.order_number,
-      customerEmail: form.email,
+      customerEmail: sanitizeEmail(form.email),
       customerName: `${form.firstName} ${form.lastName}`,
       orderData: { ...orderData, id: data[0].id },
       expiresAt: Date.now() + 1000 * 60 * 60 * 24,
@@ -182,9 +180,9 @@ export const updateOrderPaymentStatus = async (
     .from('orders')
     .update({
       payment_status: 'payment_submitted',
-      payment_method: paymentMethod,
+      payment_method: sanitizeInput(paymentMethod, 50),
       payment_submitted_at: new Date().toISOString(),
-      payment_screenshot_url: screenshotUrl || null,
+      payment_screenshot_url: screenshotUrl ? sanitizeUrl(screenshotUrl) : null,
     })
     .eq('id', orderId);
 

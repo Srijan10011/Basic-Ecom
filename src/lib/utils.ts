@@ -210,11 +210,13 @@ export const useUserAddressesQuery = (userId: string | undefined) => {
   });
 };
 
-// React Query hook for admin orders
-export const useAdminOrdersQuery = (enabled: boolean = true) => {
+export const useAdminOrdersQuery = (enabled: boolean = true, userId: string | null = null) => {
   return useQuery<AdminOrder[]>({
-    queryKey: ["adminOrders"],
+    queryKey: ["adminOrders", userId],
     queryFn: async (): Promise<AdminOrder[]> => {
+      if (!userId) {
+        throw new Error('User ID required for admin orders');
+      }
       try {
         // First, check if we can connect to the database
         const { data: connectionTest, error: connectionError } = await supabase
@@ -372,10 +374,13 @@ export const useAdminOrdersQuery = (enabled: boolean = true) => {
 };
 
 // React Query hook for admin products
-export const useAdminProductsQuery = (enabled: boolean = true) => {
+export const useAdminProductsQuery = (enabled: boolean = true, userId: string | null = null) => {
   return useQuery({
-    queryKey: ["adminProducts"],
+    queryKey: ["adminProducts", userId],
     queryFn: async () => {
+      if (!userId) {
+        throw new Error('User ID required for admin products');
+      }
       const { data, error } = await supabase.from("products").select("*");
       if (error) throw error;
       return data;
@@ -390,10 +395,13 @@ export const useAdminProductsQuery = (enabled: boolean = true) => {
 };
 
 // React Query hook for categories
-export const useCategoriesQuery = (enabled: boolean = true) => {
+export const useCategoriesQuery = (enabled: boolean = true, userId: string | null = null) => {
   return useQuery({
-    queryKey: ["categories"],
+    queryKey: ["categories", userId],
     queryFn: async () => {
+      if (!userId) {
+        throw new Error('User ID required for categories');
+      }
       const { data, error } = await supabase.from("categories").select("*");
       if (error) throw error;
       return data;

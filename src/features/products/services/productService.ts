@@ -1,6 +1,9 @@
 import { supabase } from '../../../lib/supabaseClient';
-
-export const createProduct = async (productData: any) => {
+import { verifyAdminRole } from '../../admin/services/adminService';
+export const createProduct = async (productData: any, userId: string) => {
+    if (!await verifyAdminRole(userId)) {
+        throw new Error('Unauthorized: Admin access required');
+    }
     const { data, error } = await supabase
         .from('products')
         .insert([productData])
@@ -10,7 +13,10 @@ export const createProduct = async (productData: any) => {
     return data;
 };
 
-export const updateProduct = async (id: string, productData: any) => {
+export const updateProduct = async (id: string, productData: any, userId: string) => {
+    if (!await verifyAdminRole(userId)) {
+        throw new Error('Unauthorized: Admin access required');
+    }
     const { data, error } = await supabase
         .from('products')
         .update(productData)
@@ -20,7 +26,10 @@ export const updateProduct = async (id: string, productData: any) => {
     return data;
 };
 
-export const deleteProduct = async (id: string) => {
+export const deleteProduct = async (id: string, userId: string) => {
+    if (!await verifyAdminRole(userId)) {
+        throw new Error('Unauthorized: Admin access required');
+    }
     const { error } = await supabase
         .from('products')
         .delete()

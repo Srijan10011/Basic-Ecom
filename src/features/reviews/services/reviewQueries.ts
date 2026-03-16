@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabaseClient';
+import { sanitizeInput, sanitizeUrl } from '../../../lib/sanitize';
 
 export interface Review {
   id: number;
@@ -23,12 +24,12 @@ export const useCanUserReviewQuery = (userId: string | undefined, productId: num
     queryKey: ['canUserReview', userId, productId],
     queryFn: async () => {
       if (!userId || !productId) return false;
-      
+
       const { data, error } = await supabase.rpc('can_user_review_product', {
         p_user_id: userId,
         p_product_id: productId
       });
-      
+
       if (error) throw error;
       return data;
     },
@@ -43,15 +44,15 @@ export const useUserReviewQuery = (userId: string | undefined, productId: number
     queryKey: ['userReview', userId, productId],
     queryFn: async () => {
       if (!userId || !productId) return null;
-      
+
       const { data, error } = await supabase
         .from('reviews')
         .select('*')
-        
+
         .eq('user_id', userId)
         .eq('product_id', productId)
         .single();
-      
+
       if (error && error.code !== 'PGRST116') throw error; // PGRST116 = no rows found
       return data;
     },
@@ -66,11 +67,11 @@ export const useProductReviewsQuery = (productId: number | null) => {
     queryKey: ['productReviews', productId],
     queryFn: async () => {
       if (!productId) return [];
-      
+
       const { data, error } = await supabase.rpc('get_product_reviews', {
         p_product_id: productId
       });
-      
+
       if (error) throw error;
       return data || [];
     },
@@ -85,15 +86,15 @@ export const useProductReviewStatsQuery = (productId: number | null) => {
     queryKey: ['productReviewStats', productId],
     queryFn: async () => {
       if (!productId) return { average_rating: 0, review_count: 0 };
-      
+
       const [avgResult, countResult] = await Promise.all([
         supabase.rpc('get_product_average_rating', { p_product_id: productId }),
         supabase.rpc('get_product_review_count', { p_product_id: productId })
       ]);
-      
+
       if (avgResult.error) throw avgResult.error;
       if (countResult.error) throw countResult.error;
-      
+
       return {
         average_rating: avgResult.data || 0,
         review_count: countResult.data || 0
@@ -107,7 +108,7 @@ export const useProductReviewStatsQuery = (productId: number | null) => {
 // Submit a new review
 export const useSubmitReviewMutation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ userId, productId, rating, comment, image_url }: {
       userId: string;
@@ -122,12 +123,12 @@ export const useSubmitReviewMutation = () => {
           user_id: userId,
           product_id: productId,
           rating,
-          comment,
-          image_url
+          comment: sanitizeInput(comment, 1000),
+          image_url: sanitizeUrl(image_url)
         })
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     },
@@ -143,26 +144,37 @@ export const useSubmitReviewMutation = () => {
 // Update an existing review
 export const useUpdateReviewMutation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: async ({ reviewId, rating, comment, image_url }: {
+    mutationFn: async ({ reviewId, userId, rating, comment, image_url }: {
       reviewId: number;
+      userId: string;
       rating: number;
       comment: string;
       image_url: string;
     }) => {
+      // Verify ownership before update
+      const { data: review, error: fetchError } = await supabase
+        .from('reviews')
+        .select('user_id, product_id')
+        .eq('id', reviewId)
+        .single();
+
+      if (fetchError || !review) throw new Error('Review not found');
+      if (review.user_id !== userId) throw new Error('Unauthorized: You can only update your own reviews');
+
       const { data, error } = await supabase
         .from('reviews')
         .update({
           rating,
-          comment,
-          image_url,
+          comment: sanitizeInput(comment, 1000),
+          image_url: sanitizeUrl(image_url),
           updated_at: new Date().toISOString()
         })
         .eq('id', reviewId)
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     },
@@ -178,25 +190,35 @@ export const useUpdateReviewMutation = () => {
 // Delete a review
 export const useDeleteReviewMutation = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: async (reviewId: number) => {
+    mutationFn: async ({ reviewId, userId }: { reviewId: number; userId: string }) => {
+      // Verify ownership before deletion
+      const { data: review, error: fetchError } = await supabase
+        .from('reviews')
+        .select('user_id, product_id')
+        .eq('id', reviewId)
+        .single();
+
+      if (fetchError || !review) throw new Error('Review not found');
+      if (review.user_id !== userId) throw new Error('Unauthorized: You can only delete your own reviews');
+
       const { error } = await supabase
         .from('reviews')
         .delete()
         .eq('id', reviewId);
-      
-      if (error) throw error;
-    },
-    onSuccess: (_, reviewId) => {
-      // Invalidate all review-related queries
-      queryClient.invalidateQueries({ queryKey: ['productReviews'] });
-      queryClient.invalidateQueries({ queryKey: ['productReviewStats'] });
-      queryClient.invalidateQueries({ queryKey: ['userReview'] });
-     },                                      // closes onSuccess object property
-  });                                       // closes object for useMutation
-};
 
+      if (error) throw error;
+      return review;
+    },
+    onSuccess: (data) => {
+      // Invalidate all review-related queries
+      queryClient.invalidateQueries({ queryKey: ['productReviews', data.product_id] });
+      queryClient.invalidateQueries({ queryKey: ['productReviewStats', data.product_id] });
+      queryClient.invalidateQueries({ queryKey: ['userReview'] });
+    },
+  });
+};
 
 
 // Submit owner reply to a review
@@ -210,7 +232,7 @@ export const useSubmitOwnerReplyMutation = () => {
     }) => {
       const { data, error } = await supabase
         .from('reviews')
-        .update({ owner_reply: ownerReply, updated_at: new Date().toISOString() })
+        .update({ owner_reply: sanitizeInput(ownerReply, 1000), updated_at: new Date().toISOString() })
         .eq('id', reviewId)
         .select()
         .single();
@@ -221,6 +243,6 @@ export const useSubmitOwnerReplyMutation = () => {
     onSuccess: (data) => {
       // Invalidate product reviews to refetch with owner reply
       queryClient.invalidateQueries({ queryKey: ['productReviews', data.product_id] });
-     },                                      // closes onSuccess object property
+    },                                      // closes onSuccess object property
   });                                       // closes object for useMutation
 };

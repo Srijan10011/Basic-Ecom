@@ -43,7 +43,6 @@ const queryClient = new QueryClient({
   },
 });
 // Make queryClient available globally for cache invalidation
-(window as any).queryClient = queryClient;
 
 function App() {
   // UI State

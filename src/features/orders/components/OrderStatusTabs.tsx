@@ -12,9 +12,10 @@ import { getStatusColor } from '../../../shared/utils/orderHelpers';
 interface OrderStatusTabsProps {
   orders: AdminOrder[];
   onStatusChange: (orderId: string, status: string, userId: string | null) => void;
+  adminUserId: string | null;
 }
 
-const OrderStatusTabs = ({ orders, onStatusChange }: OrderStatusTabsProps) => {
+  const OrderStatusTabs = ({ orders, onStatusChange, adminUserId }: OrderStatusTabsProps) => {
   const [currentPages, setCurrentPages] = React.useState({
     all: 1,
     pending: 1,
@@ -204,7 +205,7 @@ const OrderStatusTabs = ({ orders, onStatusChange }: OrderStatusTabsProps) => {
               <TableCell>
                 <Select
                   value={order.status}
-                  onValueChange={(value) => onStatusChange(order.id, value, order.user_id || null)}
+                  onValueChange={(value) => onStatusChange(order.id, value, adminUserId)}
                 >
                   <SelectTrigger className="w-32 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600">
                     <SelectValue />

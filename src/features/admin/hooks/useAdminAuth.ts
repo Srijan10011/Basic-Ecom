@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
-import { adminService } from '../services/adminService';
-import { useQuery } from '@tanstack/react-query';
+
 export const useAdminAuth = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
@@ -11,6 +10,10 @@ export const useAdminAuth = () => {
     useEffect(() => {
         async function checkUserAndRole() {
             try {
+                // Clear any cached user data
+                localStorage.removeItem('guestSessions');
+                localStorage.removeItem('guestContactInfo');
+                sessionStorage.clear();
                 const { data: { user } } = await supabase.auth.getUser();
                 if (user) {
                     setIsAuthenticated(true);

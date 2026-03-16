@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { useMutation } from '@tanstack/react-query';
-
+import { sanitizeInput, sanitizeEmail } from '../../lib/sanitize';
 export default function Contact() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -15,8 +15,12 @@ export default function Contact() {
     mutationFn: async (formData: { name: string; email: string; message: string }) => {
       const { error } = await supabase
         .from('contact_submissions')
-        .insert([formData]);
-      
+        .insert([{
+          name: sanitizeInput(formData.name, 100),
+          email: sanitizeEmail(formData.email),
+          message: sanitizeInput(formData.message, 2000)
+        }]);
+
       if (error) throw error;
       return { success: true };
     },

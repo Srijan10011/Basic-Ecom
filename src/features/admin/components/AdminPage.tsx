@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { updateOrderStatus } from '../../orders/services/orderService';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../shared/components/ui/card';
 import { Button } from '../../../shared/components/ui/button';
 import { Badge } from '../../../shared/components/ui/badge';
@@ -23,21 +24,14 @@ import ProductEditDialog from '../../products/components/ProductEditDialog';
 import ProductViewDialog from '../../products/components/ProductViewDialog';
 import ProductCard from '../../products/components/ProductCard';
 import { createProduct, updateProduct } from '../../products/services/productService';
-import { updateOrderStatus } from '../../orders/services/orderService';
 import { getStatusColor } from '../../../shared/utils/orderHelpers';
 import AddProductDialog from './AddProductDialog';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 
 // Mock API functions (replace with actual API calls)
 // Mock API functions (replace with actual API calls)
-const mockApiRequest = async (method: string, url: string, data?: any) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      console.log(`Mock API: ${method} ${url}`, data);
-      resolve({});
-    }, 500);
-  });
-};
+
+
 
 
 
@@ -74,33 +68,32 @@ const AdminPage: React.FC<AdminPageProps> = ({ setCurrentPage }) => {
   const { isAuthenticated, isLoading, userRole, userId, isAdmin } = useAdminAuth();
 
   // Use React Query for data fetching with automatic refetching
-  const { 
-    data: orders = [], 
-    isLoading: ordersLoading, 
+  
+  const {
+    data: orders = [],
+    isLoading: ordersLoading,
     error: ordersError,
-    refetch: refetchOrders 
-  } = useAdminOrdersQuery(isAuthenticated && userRole === 'admin');
+    refetch: refetchOrders
+  } = useAdminOrdersQuery(isAuthenticated && userRole === 'admin', userId);
 
-  const { 
-    data: products = [], 
-    isLoading: productsLoading, 
+  const {
+    data: products = [],
+    isLoading: productsLoading,
     error: productsError,
-    refetch: refetchProducts 
-  } = useAdminProductsQuery(isAuthenticated && userRole === 'admin');
-
-  const { 
-    data: categories = [], 
-    isLoading: categoriesLoading, 
-    error: categoriesError,
-    refetch: refetchCategories 
-  } = useCategoriesQuery(isAuthenticated && userRole === 'admin');
-
-  const { 
-    data: totalCustomers, 
-    isLoading: customersLoading, 
+    refetch: refetchProducts
+  } = useAdminProductsQuery(isAuthenticated && userRole === 'admin', userId);
+const {
+    data: totalCustomers,
+    isLoading: customersLoading,
     error: customersError,
-    refetch: refetchCustomers 
-  } = useTotalCustomersQuery(isAuthenticated && userRole === 'admin');
+    refetch: refetchCustomers
+  } = useTotalCustomersQuery(isAuthenticated && userRole === 'admin', userId);
+  const {
+    data: categories = [],
+    isLoading: categoriesLoading,
+    error: categoriesError,
+    refetch: refetchCategories
+  } = useCategoriesQuery(isAuthenticated && userRole === 'admin', userId);
 
   // Manual refetch functions
   const handleRefetchOrders = async () => {
@@ -147,7 +140,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ setCurrentPage }) => {
   badgeColor: newProduct.badgeColor,
   details: newProduct.details || [],
     product_owner_id: userId,
-});
+}, (userId as string));
       
     },
     onSuccess: () => {
@@ -173,14 +166,13 @@ const AdminPage: React.FC<AdminPageProps> = ({ setCurrentPage }) => {
   };
 
   // Update order status mutation
-  const updateOrderStatusMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ id, status, userId }: { id: string; status: string; userId: string }) => {
       console.log(`Attempting to update order ${id} to status: ${status}`);
-      const data = await updateOrderStatus(id, status);
+      const data = await updateOrderStatus(id, status, userId);
       console.log(`Order ${id} status updated successfully.`, data);
       return data;
-    },
-    onSuccess: (data, variables) => {
+    },    onSuccess: (data, variables) => {
       console.log(`Order ${variables.id} status updated successfully to ${variables.status}.`, data);
       toast({
         title: "Order updated",
@@ -202,8 +194,12 @@ const AdminPage: React.FC<AdminPageProps> = ({ setCurrentPage }) => {
 
   const handleStatusChange = (orderId: string, status: string, userId: string | null) => {
     console.log(`handleStatusChange called for Order ID: ${orderId}, Status: ${status}, User ID: ${userId}`);
-    updateOrderStatusMutation.mutate({ id: orderId, status });
-  };
+    if (!userId) {
+        toast({ title: "Error", description: "User not authenticated" });
+        return;
+    }
+    updateOrderStatusMutation.mutate({ id: orderId, status, userId });
+};
 
 
 
@@ -407,7 +403,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ setCurrentPage }) => {
             <OrderStatusTabs 
               orders={orders}
               onStatusChange={handleStatusChange}
-              
+              adminUserId={userId}
             />
           </TabsContent>
 
@@ -453,14 +449,13 @@ const AdminPage: React.FC<AdminPageProps> = ({ setCurrentPage }) => {
         </Tabs>
 
         {/* Product Edit Dialog */}
-        {selectedProduct && (
-          <ProductEditDialog
-            product={selectedProduct}
-            categories={categories || []}
-            isOpen={isEditDialogOpen}
-            onClose={handleCloseEditDialog}
-          />
-        )}
+        <ProductEditDialog
+  product={selectedProduct}
+  categories={categories || []}
+  isOpen={isEditDialogOpen}
+  onClose={handleCloseEditDialog}
+  userId={userId as string}
+/>
 
         {/* Product View Dialog */}
         {selectedProduct && (

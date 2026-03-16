@@ -79,6 +79,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ productId, userId, existingRevi
       if (existingReview) {
         await updateReviewMutation.mutateAsync({
           reviewId: existingReview.id,
+          userId,
           rating,
           comment,
           image_url: imageUrl,
@@ -349,11 +350,11 @@ export default function ReviewSection({ productId, userId }: ReviewSectionProps)
   const { data: reviewStats, isLoading: statsLoading } = useProductReviewStatsQuery(productId);
   const deleteReviewMutation = useDeleteReviewMutation();
 
-  const handleDeleteReview = async () => {
-    if (!userReview || !confirm('Are you sure you want to delete your review?')) return;
-    
+    const handleDeleteReview = async () => {
+    if (!userReview || !userId || !confirm('Are you sure you want to delete your review?')) return;
+
     try {
-      await deleteReviewMutation.mutateAsync(userReview.id);
+      await deleteReviewMutation.mutateAsync({ reviewId: userReview.id, userId });
       setEditingReview(null);
     } catch (error: any) {
       console.error('Error deleting review:', error);

@@ -1,8 +1,9 @@
 export const QUERY_STALE_TIME = 5 * 60 * 1000; // 5 minutes
-export const CART_STORAGE_KEY = 'guest-cart-items';
-export const GUEST_CONTACT_KEY = 'guestContactInfo';
-export const THEME_STORAGE_KEY = 'theme';
-export const AUTH_STORAGE_KEY = 'bolt-auth-token';
+const PREFIX = 'web-bolt_';
+export const CART_STORAGE_KEY = PREFIX + 'guest-cart-items';
+export const GUEST_CONTACT_KEY = PREFIX + 'guestContactInfo';
+export const THEME_STORAGE_KEY = PREFIX + 'theme';
+export const AUTH_STORAGE_KEY = PREFIX + 'bolt-auth-token';
 
 export const PAGINATION = {
     PRODUCTS_PER_PAGE: 12,
