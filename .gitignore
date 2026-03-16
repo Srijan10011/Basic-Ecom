@@ -46,10 +46,9 @@ Thumbs.db
 
 # Old/unused files
 App.*.tsx
-Checkout.tsx
-Shop.tsx
+
 KombaiWrapper.tsx
-main.tsx
+
 
 # SQL files (keep GENERATED_SCHEMA.sql and MOCK_DATA.sql)
 database-setup.sql
