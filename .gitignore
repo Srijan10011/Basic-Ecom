@@ -48,7 +48,6 @@ Thumbs.db
 App.*.tsx
 Checkout.tsx
 Shop.tsx
-ErrorBoundary.tsx
 KombaiWrapper.tsx
 main.tsx
 
