@@ -395,23 +395,16 @@ export const useAdminProductsQuery = (enabled: boolean = true, userId: string | 
 };
 
 // React Query hook for categories
-export const useCategoriesQuery = (enabled: boolean = true, userId: string | null = null) => {
+export const useCategoriesQuery = () => {
   return useQuery({
-    queryKey: ["categories", userId],
+    queryKey: ["categories"],
     queryFn: async () => {
-      if (!userId) {
-        throw new Error('User ID required for categories');
-      }
       const { data, error } = await supabase.from("categories").select("*");
       if (error) throw error;
       return data;
     },
-    enabled,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
-    refetchOnReconnect: true,
-    refetchOnMount: false,
-    retry: 1,
   });
 };
 

@@ -10,8 +10,9 @@ import { usePaymentFlow } from '../hooks/usePaymentFlow';
 import { useOrderResume } from '../hooks/useOrderResume';
 import { createOrder } from '../services/orderService';
 import { validateFormAndLocation , validateField } from '../services/validationService';
-import { getGeolocation, formatLocation } from '../services/locationService';
+import { getGeolocation, formatLocation, parseLocation } from '../services/locationService';
 import { CartItem } from '../types/checkout';
+import { calculateShipping } from '../../../shared/utils/shippingHelpers';
 interface CheckoutProps {
   cart: any[];
   setCurrentPage: (page: string) => void;
@@ -31,6 +32,8 @@ export default function Checkout({
   setResumeOrderId,
   setTrackOrderId,
 }: CheckoutProps) {
+  const [shippingFee, setShippingFee] = useState<number>(2.99);
+const [calculatingShipping, setCalculatingShipping] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [showMapModal, setShowMapModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,13 +87,14 @@ const handleFieldChange = (fieldName: string, value: string) => {
   }));
 };
   const handleGetLocation = async () => {
-    try {
-      const { latitude, longitude } = await getGeolocation();
-      updateField('location', formatLocation(latitude, longitude));
-    } catch (error: any) {
-      alert(error.message);
-    }
-  };
+  try {
+    const { latitude, longitude } = await getGeolocation();
+    updateField('location', formatLocation(latitude, longitude));
+    setShowMapModal(true);
+  } catch (error: any) {
+    alert(error.message);
+  }
+};
 
   const handlePlaceOrder = async () => {
     if (isSubmitting) return;
@@ -112,7 +116,7 @@ const handleFieldChange = (fieldName: string, value: string) => {
         console.log('Guest checkout');
       }
 
-      const order = await createOrder(form, displayCart, currentUser, form.location!);
+      const order = await createOrder(form, displayCart, currentUser, form.location!, shippingFee);
 
       payment.setOrderInfo(order.id, order.payment_reference_id, order.total_amount);
       payment.setOrderNumber(order.order_number);
@@ -245,11 +249,16 @@ const handleFieldChange = (fieldName: string, value: string) => {
             </div>
             {showMapModal && (
               <MapPickerModal
-                onClose={() => setShowMapModal(false)}
-                onLocationSelect={(lat, lng) => {
-                  updateField('location', formatLocation(lat, lng));
-                  setShowMapModal(false);
-                }}
+  onClose={() => setShowMapModal(false)}
+  initialPosition={form.location ? (() => { const { lat, lng } = parseLocation(form.location!); return { lat, lng }; })() : undefined}
+  onLocationSelect={async (lat, lng) => {
+  updateField('location', formatLocation(lat, lng));
+  setShowMapModal(false);
+  setCalculatingShipping(true);
+  const fee = await calculateShipping(lat, lng);
+  setShippingFee(fee);
+  setCalculatingShipping(false);
+}}
               />
             )}
           </div>
@@ -286,13 +295,15 @@ const handleFieldChange = (fieldName: string, value: string) => {
                   </div>
                   <div className="flex justify-between">
                     <p className="text-gray-600 dark:text-gray-300">Shipping</p>
-                    <p className="font-semibold text-gray-800 dark:text-white">Rs 5.99</p>
+                    <p className="font-semibold text-gray-800 dark:text-white">
+  {calculatingShipping ? 'Calculating...' : `Rs ${shippingFee.toFixed(2)}`}
+</p>
                   </div>
                 </div>
                 <div className="border-t border-gray-200 dark:border-gray-700 my-6"></div>
                 <div className="flex justify-between items-center">
-                  <p className="text-xl font-bold text-gray-800 dark:text-white">Total</p>
-                  <p className="text-2xl font-bold text-gray-800 dark:text-white">Rs {(totalPrice + 5.99).toFixed(2)}</p>
+                    <p className="text-xl font-bold text-gray-800 dark:text-white">Total</p>
+                    <p className="text-2xl font-bold text-gray-800 dark:text-white">Rs {(totalPrice + shippingFee).toFixed(2)}</p>
                 </div>
                 <button
                   onClick={isResumingOrder ? payment.openPaymentDialog : handlePlaceOrder}
@@ -300,8 +311,8 @@ const handleFieldChange = (fieldName: string, value: string) => {
                   className="w-full mt-8 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 rounded-lg font-semibold text-lg transition-colors"
                 >
                   {isResumingOrder 
-                    ? `Proceed to Payment - Rs ${(totalPrice + 5.99).toFixed(2)}`
-                    : `${isSubmitting ? 'Processing...' : 'Place Order'} - Rs ${(totalPrice + 5.99).toFixed(2)}`
+                    ? `Proceed to Payment - Rs ${(totalPrice + shippingFee).toFixed(2)}`
+                    : `${isSubmitting ? 'Processing...' : 'Place Order'} - Rs ${(totalPrice + shippingFee).toFixed(2)}`
                   }
                 </button>
                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-4">By placing your order, you agree to our terms and conditions.</p>
@@ -347,7 +358,7 @@ const handleFieldChange = (fieldName: string, value: string) => {
           onClose={payment.closePaymentDetailsDialog}
           paymentMethod={payment.selectedPayment || 'esewa'}
           orderId={payment.currentOrderId}
-          amount={parseFloat(payment.currentOrderAmount || (totalPrice + 5.99).toString())}
+          amount={parseFloat(payment.currentOrderAmount || (totalPrice + shippingFee).toString())}
           paymentReferenceId={payment.paymentReferenceId}
           orderNumber={payment.currentOrderNumber || ''}
           clearCart={clearCart}

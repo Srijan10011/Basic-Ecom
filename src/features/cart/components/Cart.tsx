@@ -74,7 +74,7 @@ export default function Cart({ cart, setCurrentPage, updateCartQuantity, removeF
               </div>
               <div className="flex justify-between">
                 <p className="text-gray-600 dark:text-gray-300">Shipping</p>
-                <p className="font-semibold text-gray-900 dark:text-white">Free</p>
+                <p className="font-semibold text-gray-900 dark:text-white">Calculated at checkout</p>
               </div>
               <div className="flex justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
                 <p className="text-xl font-bold text-gray-900 dark:text-white">Total</p>

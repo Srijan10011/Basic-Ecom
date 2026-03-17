@@ -7,6 +7,7 @@ export const fetchOrderDetails = async (orderId: string): Promise<{
   order: OrderData;
   reconstructedCart: CartItem[];
   email: string;
+  shippingFee: number;
 }> => {
   const { data: order, error } = await supabase
     .from('orders')
@@ -58,17 +59,19 @@ export const fetchOrderDetails = async (orderId: string): Promise<{
     email = guestOrder?.customer_email || '';
   }
 
-  return { order, reconstructedCart, email };
+  return { order, reconstructedCart, email, shippingFee: parseFloat(order.shipping_fee || '2.99') };
 };
 
 export const createOrder = async (
   form: CheckoutFormData,
   cart: CartItem[],
   currentUser: any,
-  location: string
+  location: string,
+  shippingFee: number = 2.99
 ): Promise<OrderData> => {
   const totalPrice = cart.reduce((total, item) => total + item.price * item.quantity, 0);
-  const totalWithShipping = totalPrice + 5.99;
+  const totalWithShipping = totalPrice + shippingFee;
+
   const { lat, lng } = parseLocation(location);
   const paymentRef = generatePaymentReference('PAY');
 
@@ -86,6 +89,7 @@ export const createOrder = async (
       quantity: item.quantity,
       price: item.price,
     })),
+    shipping_fee: shippingFee.toFixed(2),  // add this line
   };
 
   const customerInfo = {

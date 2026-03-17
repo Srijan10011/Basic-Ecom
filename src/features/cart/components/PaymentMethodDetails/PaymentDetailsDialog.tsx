@@ -79,7 +79,7 @@ const [showSuccessDialog, setShowSuccessDialog] = useState(false);
     payment_status: 'payment_submitted',
     payment_method: paymentMethod,
     payment_submitted_at: new Date().toISOString(),
-    payment_screenshot_urldone: screenshotUrl ? sanitizeUrl(screenshotUrl) : null,
+    payment_screenshot_url: screenshotUrl ? sanitizeUrl(screenshotUrl) : null,
   })
   .eq('id', orderId);
 
