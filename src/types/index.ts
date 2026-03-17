@@ -9,6 +9,7 @@ export interface Product {
     badge?: string;
     badge_color?: string;
     stock?: number;
+    stockquantity?: number;
     created_at: string;
     updated_at: string;
     categories?: {

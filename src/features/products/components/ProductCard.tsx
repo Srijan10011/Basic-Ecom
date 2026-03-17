@@ -11,6 +11,7 @@ interface ProductCardProps {
 }
 
 const ProductCard = React.memo(({ product, onProductClick, addToCart, rating, isAddingToCart }: ProductCardProps) => {
+  const outOfStock = product.stockquantity === 0;
   return (
     <div className="group bg-white dark:bg-gray-700 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 text-left w-full flex flex-col">
       <div className="relative aspect-w-1 aspect-h-1">
@@ -28,7 +29,15 @@ const ProductCard = React.memo(({ product, onProductClick, addToCart, rating, is
                 {product.badge}
               </span>
             </div>
+            
+            
           )}
+          {outOfStock && (
+             <div className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none">
+               <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold tracking-wide">
+                 Out of Stock
+               </span>
+             </div>)}
         </button>
       </div>
 
@@ -53,12 +62,12 @@ const ProductCard = React.memo(({ product, onProductClick, addToCart, rating, is
 
       <div className="p-2 sm:p-4 pt-0">
         <button
-          onClick={() => addToCart(product)}
-          disabled={isAddingToCart}
-          className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-2 sm:py-3 rounded-lg font-semibold transition-colors transform hover:scale-105 disabled:transform-none text-xs sm:text-base"
-        >
-          {isAddingToCart ? 'Adding...' : 'Add to Cart'}
-        </button>
+  onClick={() => addToCart(product)}
+  disabled={isAddingToCart || outOfStock}
+  className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-2 sm:py-3 rounded-lg font-semibold transition-colors transform hover:scale-105 disabled:transform-none text-xs sm:text-base"
+>
+  {outOfStock ? 'Out of Stock' : isAddingToCart ? 'Adding...' : 'Add to Cart'}
+</button>
       </div>
     </div>
   );

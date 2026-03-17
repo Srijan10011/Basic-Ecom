@@ -20,16 +20,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const destination = `${lat},${lng}`;
   const key = context.env.GOOGLE_MAPS_KEY;
 
-  console.log('key exists:', !!key);
-  console.log('origin:', origin, 'destination:', destination);
-
   try {
     const res = await fetch(
       `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin}&destinations=${destination}&key=${key}`
     );
     const data = await res.json() as any;
-    console.log('API status:', data.status);
-    console.log('element status:', data.rows?.[0]?.elements?.[0]?.status);
     const element = data.rows?.[0]?.elements?.[0];
 
     if (!element || element.status !== 'OK') {

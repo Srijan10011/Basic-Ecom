@@ -54,19 +54,19 @@ export const useProductsQuery = (
         }
       }
 
-      // Apply sorting
+      // Apply sorting — always push out-of-stock to end
       switch (filters?.sortBy) {
         case 'price-asc':
-          query = query.order('price', { ascending: true });
+          query = query.order('stockquantity', { ascending: false }).order('price', { ascending: true });
           break;
         case 'price-desc':
-          query = query.order('price', { ascending: false });
+          query = query.order('stockquantity', { ascending: false }).order('price', { ascending: false });
           break;
         case 'name':
-          query = query.order('name', { ascending: true });
+          query = query.order('stockquantity', { ascending: false }).order('name', { ascending: true });
           break;
         default:
-          query = query.order('created_at', { ascending: false });
+          query = query.order('stockquantity', { ascending: false }).order('created_at', { ascending: false });
       }
 
       const { data, error, count } = await query.range(from, to);

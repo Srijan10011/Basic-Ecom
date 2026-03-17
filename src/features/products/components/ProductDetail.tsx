@@ -12,7 +12,7 @@ interface Product {
   image: string;
   categories: { id: number; name: string; slug: string };
   rating: number;
-  stockQuantity: number;
+  stockquantity: number;
   location: string;
 }
 
@@ -138,18 +138,18 @@ export default function ProductDetail({ productId, setCurrentPage, addToCart, se
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Product Details</h3>
               <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-2">
                 <li>Category: {product.categories.name}</li>
-                <li>Stock: {product.stockQuantity} units available</li>
+                <li>Stock: {product.stockquantity > 0 ? `${product.stockquantity} units available` : <span className="text-red-500 font-semibold">Out of Stock</span>}</li>
                 <li>Location: {product.location}</li>
               </ul>
             </div>
 
             <button
               onClick={() => addToCart(product)}
-              disabled={addingToCartId === product.id}
+              disabled={addingToCartId === product.id || product.stockquantity === 0}
               className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 rounded-lg font-semibold text-lg flex items-center justify-center space-x-2 transition-colors transform hover:scale-105 disabled:transform-none"
             >
               <ShoppingCart className="h-6 w-6" />
-              <span>{addingToCartId === product.id ? 'Adding...' : 'Add to Cart'}</span>
+              <span>{product.stockquantity === 0 ? 'Out of Stock' : addingToCartId === product.id ? 'Adding...' : 'Add to Cart'}</span>
             </button>
           </div>
         </div>

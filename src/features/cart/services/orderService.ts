@@ -137,6 +137,13 @@ export const createOrder = async (
   if (error) throw error;
   if (!data || data.length === 0) throw new Error('Failed to create order');
 
+  // Decrement stockquantity for each ordered item
+  await Promise.all(
+    cart.map(({ id, quantity }) =>
+      supabase.rpc('decrement_stock', { product_id: id, amount: quantity })
+    )
+  );
+
   // Handle guest user
   if (!currentUser && data.length > 0) {
     await supabase.from('guest_order').insert([
