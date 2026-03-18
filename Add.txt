@@ -1,0 +1,314 @@
+Creating: /home/srijan1001/Web-Bolt/src/features/admin/components/AddCategoryDialog.tsx
+ - Completed in 0.1s
+
+I'll modify the following file: src/features/admin/services/adminService.ts (using tool: write)
+
++      100:     async addCategory(userId: string, name: string, slug: string) {
++      101:         if (!await verifyAdminRole(userId)) {
++      102:             throw new Error('Unauthorized: Admin access required');
++      103:         }
++      104:         const { data, error } = await supabase
++      105:             .from("categories")
++      106:             .insert({ name, slug })
++      107:             .select()
++      108:             .single();
++      109:         if (error) throw error;
++      110:         return data;
++      111:     },
++      112:
+  100, 113:     async updateOrderStatus(orderId: string, status: string, userId: string) {
+
+
+Allow this action? Use 't' to trust (always allow) this tool for the session. [y/n/t]:
+
+> y
+
+Updating: src/features/admin/services/adminService.ts
+ - Completed in 0.1s
+
+> Now update AdminPage.tsx — add the import, state, mutation, button, and dialog:
+I'll modify the following file: src/features/admin/components/AdminPage.tsx (using tool: write)
+
+- 28    : import AddProductDialog from './AddProductDialog';
+ import AddProductDialog from './AddProductDialog';
+ import AddCategoryDialog from './AddCategoryDialog';
+ import { adminService } from '../services/adminService';
+
+
+Allow this action? Use 't' to trust (always allow) this tool for the session. [y/n/t]:
+
+> y
+
+Updating: src/features/admin/components/AdminPage.tsx
+ - Completed in 0.1s
+
+I'll modify the following file: src/features/admin/components/AdminPage.tsx (using tool: write)
+
+- 64    :   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
++     64:   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
++     65:   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
+
+
+Allow this action? Use 't' to trust (always allow) this tool for the session. [y/n/t]:
+
+> y
+
+Updating: src/features/admin/components/AdminPage.tsx
+ - Completed in 0.1s
+
+I'll modify the following file: src/features/admin/components/AdminPage.tsx (using tool: write)
+
+  0,  0:   const handleRefetchCategories = async () => {
+  1,  1:     await refetchCategories();
+- 2    :   };
++     2:   };
++     3:
++     4:   const addCategoryMutation = useMutation({
++     5:     mutationFn: ({ name, slug }: { name: string; slug: string }) =>
++     6:       adminService.addCategory(userId as string, name, slug),
++     7:     onSuccess: () => {
++     8:       toast({ title: "Category added", description: "New category created successfully." });
++     9:       queryClient.invalidateQueries({ queryKey: ['categories'] });
++    10:       setIsAddCategoryOpen(false);
++    11:     },
++    12:     onError: () => {
++    13:       toast({ title: "Error", description: "Failed to add category.", variant: "destructive" });
++    14:     },
++    15:   });
+
+
+Allow this action? Use 't' to trust (always allow) this tool for the session. [y/n/t]:
+
+> y
+
+Updating: src/features/admin/components/AdminPage.tsx
+ ⋮
+⠋ Thinking... ● Execution failed after 0.1s:
+no occurrences of "  const handleRefetchCategories = async () => {
+    await refetchCategories();
+  };" were found
+
+Searching for: handleRefetchCategories in /home/srijan1001/Web-Bolt/src/features/admin/components/AdminPage.tsx (using tool: grep)
+ ✓ Successfully found 1 matches in 1 files under /home/srijan1001/Web-Bolt/src/features/admin/components/AdminPage.tsx
+ - Completed in 0.1s
+
+Reading file: /home/srijan1001/Web-Bolt/src/features/admin/components/AdminPage.tsx, from line 108 to 118 (using tool: read)
+ ✓ Successfully read 232 bytes from /home/srijan1001/Web-Bolt/src/features/admin/components/AdminPage.tsx
+ - Completed in 0.1s
+
+I'll modify the following file: src/features/admin/components/AdminPage.tsx (using tool: write)
+
+  0,  0:   const handleRefetchCategories = async () => {
+  1,  1:     await refetchCategories();
+  2,  2:   };
+  3,  3:
++     4:   const addCategoryMutation = useMutation({
++     5:     mutationFn: ({ name, slug }: { name: string; slug: string }) =>
++     6:       adminService.addCategory(userId as string, name, slug),
++     7:     onSuccess: () => {
++     8:       toast({ title: "Category added", description: "New category created successfully." });
++     9:       queryClient.invalidateQueries({ queryKey: ['categories'] });
++    10:       setIsAddCategoryOpen(false);
++    11:     },
++    12:     onError: () => {
++    13:       toast({ title: "Error", description: "Failed to add category.", variant: "destructive" });
++    14:     },
++    15:   });
++    16:
+  4, 17:   // Product form
+
+
+Allow this action? Use 't' to trust (always allow) this tool for the session. [y/n/t]:
+
+> y
+
+Updating: src/features/admin/components/AdminPage.tsx
+ ⋮
+ Thinking...1m ● Execution failed after 0.0s:
+no occurrences of "  const handleRefetchCategories = async () => {
+    await refetchCategories();
+  };
+
+  // Product form" were found
+
+
+
+> Give me all the compoenets that needs to be added or changed. Also provide me reference like this file, after this line, change these compoenet with these new compoenent..
+
+> Let me do a final read of the current state of the files.
+Batch fs_read operation with 2 operations (using tool: read)
+
+↱ Operation 1: Reading file: /home/srijan1001/Web-Bolt/src/features/admin/services/adminService.ts, all lines
+↱ Operation 2: Reading file: /home/srijan1001/Web-Bolt/src/features/admin/components/AdminPage.tsx, all lines
+ ✓ Successfully read 4620 bytes from /home/srijan1001/Web-Bolt/src/features/admin/services/adminService.ts
+
+ ✓ Successfully read 19169 bytes from /home/srijan1001/Web-Bolt/src/features/admin/components/AdminPage.tsx
+
+ ⋮
+
+- Summary: 2 operations processed, 2 successful, 0 failed
+ - Completed in 0.2s
+
+> Good — I can see the current state clearly. The imports and state for AddCategoryDialog are already there from the
+previous partial attempt. Here's exactly what still needs to be done:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+## Changes Required
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+### File 1: src/features/admin/services/adminService.ts
+
+✅ Already done — addCategory method is already in the file. No changes needed.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+### File 2: src/features/admin/components/AdminPage.tsx
+
+Two spots need changes:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+Change 1 — After line 113 (handleRefetchCategories function), add the mutation:
+
+After this existing block:
+ts
+const handleRefetchCategories = async () => {
+    await refetchCategories();
+  };
+
+
+Add this:
+ts
+const addCategoryMutation = useMutation({
+    mutationFn: ({ name, slug }: { name: string; slug: string }) =>
+      adminService.addCategory(userId as string, name, slug),
+    onSuccess: () => {
+      toast({ title: "Category added", description: "New category created successfully." });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setIsAddCategoryOpen(false);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to add category.", variant: "destructive" });
+    },
+  });
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+Change 2 — The "Add New Product" button div, replace it:
+
+Find this existing block (~line 248):
+tsx
+<div className="flex justify-end mb-4">
+  <Button onClick={() => setIsAddProductOpen(true)} className="dark:text-white">Add New Product</Button>
+</div>
+
+<AddProductDialog
+  open={isAddProductOpen}
+  onOpenChange={setIsAddProductOpen}
+  productForm={productForm}
+  onSubmit={onSubmitProduct}
+  categories={categories}
+/>
+
+
+Replace with:
+tsx
+<div className="flex justify-end gap-3 mb-4">
+  <Button onClick={() => setIsAddCategoryOpen(true)} variant="outline" className="dark:text-white dark:border-gray-600 dark:bg-gray-800">
+    Add Category
+  </Button>
+  <Button onClick={() => setIsAddProductOpen(true)} className="dark:text-white">Add New Product</Button>
+</div>
+
+<AddProductDialog
+  open={isAddProductOpen}
+  onOpenChange={setIsAddProductOpen}
+  productForm={productForm}
+  onSubmit={onSubmitProduct}
+  categories={categories}
+/>
+
+<AddCategoryDialog
+  open={isAddCategoryOpen}
+  onOpenChange={setIsAddCategoryOpen}
+  onSubmit={(name, slug) => addCategoryMutation.mutate({ name, slug })}
+  isLoading={addCategoryMutation.isPending}
+/>
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+### File 3: src/features/admin/components/AddCategoryDialog.tsx
+
+This is a new file — create it at that path with this content:
+
+tsx
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../../shared/components/ui/dialog';
+import { Input } from '../../../shared/components/ui/input';
+import { Button } from '../../../shared/components/ui/button';
+
+interface Props {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (name: string, slug: string) => void;
+  isLoading?: boolean;
+}
+
+export default function AddCategoryDialog({ open, onOpenChange, onSubmit, isLoading }: Props) {
+  const [name, setName] = useState('');
+
+  const slug = name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    onSubmit(name.trim(), slug);
+    setName('');
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[400px] bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+        <DialogHeader>
+          <DialogTitle className="text-gray-900 dark:text-white">Add New Category</DialogTitle>
+          <DialogDescription className="text-gray-600 dark:text-gray-400">
+            Enter a category name. The slug will be generated automatically.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+          <div>
+            <label className="text-sm font-medium text-gray-900 dark:text-gray-100">Name</label>
+            <Input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="e.g. Running Shoes"
+              className="mt-1 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+            />
+          </div>
+          {slug && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">Slug: <span className="font-mono">{slug}</span></p>
+          )}
+          <div className="flex gap-3 pt-2">
+            <Button type="submit" disabled={isLoading || !name.trim()} className="flex-1 bg-green-600 hover:bg-green-700 text-white">
+              {isLoading ? 'Adding...' : 'Add Category'}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1 dark:text-white dark:border-gray-600 dark:bg-gray-700">
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+

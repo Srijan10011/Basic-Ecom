@@ -18,7 +18,7 @@ import { createProduct } from '../services/productService';
 const productSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
-  stockquantity: z.string().regex(/^\d+$/, "Stock quantity must be a number"),
+  stockquantity: z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
   imageUrl: z.string().url("Invalid URL"),
   shortDescription: z.string().optional(),
   description: z.string().optional(),
@@ -76,10 +76,12 @@ const AddProductForm: React.FC<AddProductFormProps> = ({ categories, onClose }) 
         badge: newProduct.badge,
         badgeColor: newProduct.badgeColor,
         details_text: newProduct.details_text,
-        stockquantity: parseInt(newProduct.stockquantity) || 0,
+        stockquantity: parseFloat(newProduct.stockquantity),
       };
 
-      return await createProduct(payload);
+      const { data: { user } } = await supabase.auth.getUser();
+       if (!user) throw new Error('Not authenticated');
+       return await createProduct(payload, user.id);;
     },
     onSuccess: () => {
       toast({ title: 'Product added', description: 'New product has been added successfully.' });

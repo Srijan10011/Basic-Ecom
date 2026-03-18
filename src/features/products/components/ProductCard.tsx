@@ -8,9 +8,10 @@ interface ProductCardProps {
   addToCart: (product: Product) => void;
   rating?: { averageRating: number; reviewCount: number };
   isAddingToCart: boolean;
+  cart?:any[];
 }
 
-const ProductCard = React.memo(({ product, onProductClick, addToCart, rating, isAddingToCart }: ProductCardProps) => {
+const ProductCard = React.memo(({ product, onProductClick, addToCart, rating, isAddingToCart, cart }: ProductCardProps) => {
   const outOfStock = product.stockquantity === 0;
   return (
     <div className="group bg-white dark:bg-gray-700 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 text-left w-full flex flex-col">
@@ -61,13 +62,29 @@ const ProductCard = React.memo(({ product, onProductClick, addToCart, rating, is
       </div>
 
       <div className="p-2 sm:p-4 pt-0">
-        <button
-  onClick={() => addToCart(product)}
-  disabled={isAddingToCart || outOfStock}
-  className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-2 sm:py-3 rounded-lg font-semibold transition-colors transform hover:scale-105 disabled:transform-none text-xs sm:text-base"
->
-  {outOfStock ? 'Out of Stock' : isAddingToCart ? 'Adding...' : 'Add to Cart'}
-</button>
+        {/* Get current quantity in cart for this product */}
+        {(() => {
+          const cartItem = cart?.find(i => i.id === product.id);
+          const currentQtyInCart = cartItem ? cartItem.quantity : 0;
+          const canAddMore = currentQtyInCart + 1 <= (product.stockquantity ?? 0);
+          const disabled = isAddingToCart || outOfStock || !canAddMore;
+
+          return (
+            <button
+              onClick={() => addToCart(product)}
+              disabled={disabled}
+              className={`w-full py-2 sm:py-3 rounded-lg font-semibold transition-colors transform hover:scale-105 disabled:transform-none text-xs sm:text-base ${
+                outOfStock
+                  ? 'bg-gray-400 cursor-not-allowed text-white'
+                  : disabled
+                    ? 'bg-gray-400 cursor-not-allowed text-white'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+              }`}
+            >
+              {outOfStock ? 'Out of Stock' : disabled ? `Only ${product.stockquantity} available` : isAddingToCart ? 'Adding...' : 'Add to Cart'}
+            </button>
+          );
+        })()}
       </div>
     </div>
   );

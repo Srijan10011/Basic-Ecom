@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { supabase } from '../../../lib/supabaseClient';
 import { signIn } from '../services/authService';
 interface LoginProps {
   setModal: (modal: 'login' | 'signup' | null) => void;

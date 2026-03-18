@@ -395,6 +395,8 @@ export const useAdminProductsQuery = (enabled: boolean = true, userId: string | 
 };
 
 // React Query hook for categories
+
+
 export const useCategoriesQuery = () => {
   return useQuery({
     queryKey: ["categories"],
@@ -408,4 +410,3 @@ export const useCategoriesQuery = () => {
   });
 };
 
-// React Query hook for order tracking

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { supabase } from '../../../lib/supabaseClient';
 import { signUp, createProfile } from '../services/authService';
 
 interface SignupProps {

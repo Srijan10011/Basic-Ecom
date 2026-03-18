@@ -9,6 +9,7 @@ export const usePaymentFlow = () => {
     currentOrderId: null,
     paymentReferenceId: null,
     currentOrderAmount: null,
+    currentOrderNumber: null,
   });
 
   const openPaymentDialog = () => {

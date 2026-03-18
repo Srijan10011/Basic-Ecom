@@ -24,6 +24,7 @@ export interface CartItem {
     price: number;
     image: string;
     quantity: number;
+    stockquantity: number;
 }
 
 export interface Order {

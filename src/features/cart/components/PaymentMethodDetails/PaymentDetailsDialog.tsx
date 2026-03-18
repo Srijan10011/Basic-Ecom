@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../../shared/components/ui/dialog';
 import { paymentConfigs } from '../../../../constants/paymentConfig';
 import PaymentSuccessDialog from '../../../../shared/components/ui/PaymentSuccessDialog';

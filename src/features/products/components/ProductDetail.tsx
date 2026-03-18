@@ -24,12 +24,16 @@ interface ProductDetailProps {
   addToCart: (product: any) => void;
   session?: any;
   addingToCartId: number | null;
+  cart?: any[];
 }
 
-export default function ProductDetail({ productId, setCurrentPage, addToCart, session, addingToCartId }: ProductDetailProps) {
+
+export default function ProductDetail({ productId, setCurrentPage, addToCart, session, addingToCartId, cart }: ProductDetailProps) {
   const [loading, setLoading] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState<string | null>(null);
   // Use React Query for data fetching with automatic refetching
+  
   const { 
     data: product, 
     isLoading: productLoading, 
@@ -49,6 +53,7 @@ export default function ProductDetail({ productId, setCurrentPage, addToCart, se
       setLoading(false);
     }
   };
+  
 
   if (productLoading) {
     return (
@@ -97,6 +102,10 @@ export default function ProductDetail({ productId, setCurrentPage, addToCart, se
       </div>
     );
   }
+  const cartItem = cart?.find(i => i.id === product.id);
+const currentQtyInCart = cartItem ? cartItem.quantity : 0;
+const canAddMore = currentQtyInCart + quantity <= product.stockquantity
+  
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
@@ -145,7 +154,7 @@ export default function ProductDetail({ productId, setCurrentPage, addToCart, se
 
             <button
               onClick={() => addToCart(product)}
-              disabled={addingToCartId === product.id || product.stockquantity === 0}
+              disabled={addingToCartId === product.id || product.stockquantity === 0 || quantity >= product.stockquantity || !canAddMore}
               className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 rounded-lg font-semibold text-lg flex items-center justify-center space-x-2 transition-colors transform hover:scale-105 disabled:transform-none"
             >
               <ShoppingCart className="h-6 w-6" />

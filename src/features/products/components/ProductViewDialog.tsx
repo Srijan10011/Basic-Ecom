@@ -98,7 +98,7 @@ const ProductViewDialog: React.FC<ProductViewDialogProps> = ({
                 <div className="flex items-center space-x-2">
                   <Package className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                   <span className="text-sm text-gray-700 dark:text-gray-200">
-                    Stock: {product.stockQuantity || 0} units
+                    Stock: {product.stockquantity || 0} units
                   </span>
                 </div>
                 

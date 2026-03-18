@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { X, Plus, Minus } from 'lucide-react';
 
 interface CartProps {
@@ -53,14 +53,17 @@ export default function Cart({ cart, setCurrentPage, updateCartQuantity, removeF
                       <Minus className="h-4 w-4" />
                     </button>
                     <span className="text-gray-900 dark:text-white">{item.quantity}</span>
-                    <button onClick={() => updateCartQuantity(item.id, item.quantity + 1)} className="p-1 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white">
+                    {item.quantity >= item.stockquantity && <span className="text-xs text-red-500 ml-1">Max</span>}
+                    <button
+                      onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
+                      disabled={item.quantity >= item.stockquantity}
+                      className={`p-1 rounded-full ${item.quantity >= item.stockquantity ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'} text-gray-900 dark:text-white`}
+                    >
                       <Plus className="h-4 w-4" />
                     </button>
                   </div>
                   <p className="text-lg font-semibold text-gray-900 dark:text-white">Npr.{(item.price * item.quantity).toFixed(2)}</p>
-                  <button onClick={() => removeFromCart(item.id)} className="text-red-500 hover:text-red-700 dark:hover:text-red-400">
-                    <X className="h-5 w-5" />
-                  </button>
+                  
                 </div>
               </div>
             ))}

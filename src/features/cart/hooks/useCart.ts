@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { Session } from '@supabase/supabase-js';
 import { Product, CartItem } from '../../../types';
+
 import {
     fetchUserCart,
     addItemToUserCart,
@@ -29,6 +30,19 @@ export const useCart = (session: Session | null) => {
 
     const addToCart = useCallback(async (product: Product) => {
         if (addingToCartId === product.id) return;
+
+        // Check stock before adding
+        const foundInCart = cart.find(i => i.id === product.id);
+        const currentQtyInCart = foundInCart ? foundInCart.quantity : 0;
+
+        if (currentQtyInCart + 1 > (product.stockquantity ?? 0)) {
+            toast.error(`Cannot add more ${product.name}. You already have ${currentQtyInCart} in cart and ${product.stockquantity ?? 0} available.`, {
+                duration: 3000,
+                position: 'top-center',
+            });
+            return;
+        }
+
         setAddingToCartId(product.id);
         try {
             if (session?.user) {
@@ -40,7 +54,7 @@ export const useCart = (session: Session | null) => {
                 if (found) {
                     found.quantity += 1;
                 } else {
-                    items.push({ ...product, quantity: 1 });
+                    items.push({ ...product, quantity: 1, stockquantity: product.stockquantity ?? 0 });
                 }
                 saveGuestCart(items);
                 setCart(items);

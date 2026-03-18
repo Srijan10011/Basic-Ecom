@@ -6,6 +6,7 @@ export interface UiCartItem {
   price: number;
   image: string;
   quantity: number;
+  stockquantity: number;
 }
 
 // Lightweight auth-aware retry to handle cases where the user navigates away
@@ -123,7 +124,8 @@ export async function fetchUserCart(userId: string): Promise<UiCartItem[]> {
           id,
           name,
           price,
-          image
+          image,
+          stockquantity
         )
       `)
       .eq('user_id', userId)
@@ -142,6 +144,8 @@ export async function fetchUserCart(userId: string): Promise<UiCartItem[]> {
       price: Number(p.price) || 0,
       image: p.image || '',
       quantity: r.quantity || 1,
+      stockquantity: p.stockquantity || 0,
+
     } as UiCartItem;
   });
   return items;

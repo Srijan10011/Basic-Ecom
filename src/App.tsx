@@ -155,7 +155,7 @@ function App() {
         return (
           <div>
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
-            <Shop setCurrentPage={setCurrentPage} setSelectedProductId={setSelectedProductId} addToCart={addToCart} addingToCartId={addingToCartId} />
+              <Shop setCurrentPage={setCurrentPage} setSelectedProductId={setSelectedProductId} addToCart={addToCart} addingToCartId={addingToCartId}  />
             <Footer setCurrentPage={setCurrentPage} />
           </div>
         );

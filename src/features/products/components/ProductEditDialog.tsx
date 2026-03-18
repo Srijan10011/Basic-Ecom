@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form';
+import { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -23,7 +24,7 @@ const productEditSchema = z.object({
   badge: z.string().optional(),
   badgeColor: z.string().optional(),
   details: z.array(z.string()).optional(),
-  stockquantity: z.number().int().min(0).optional(),
+  stockquantity: z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid stock format"),
   product_owner_id: z.string().uuid("Invalid UUID format").optional(),
 });
 
@@ -64,6 +65,24 @@ const ProductEditDialog: React.FC<ProductEditDialogProps> = ({
       product_owner_id: product?.product_owner_id || '',
     },
   });
+  useEffect(() => {
+    if (product) {
+      productForm.reset({
+        name: product.name || '',
+        price: product.price?.toString() || '',
+        image: product.image || '',
+        description: product.description || product.shortDescription || '',
+        category: product.category_id || '',
+        rating: product.rating || 0,
+        reviews: product.reviews || 0,
+        badge: product.badge || '',
+        badgeColor: product.badgeColor || '',
+        details: Array.isArray(product.details) ? product.details : [],
+        stockquantity: product.stockquantity || 0,
+        product_owner_id: product.product_owner_id || '',
+      });
+    }
+  }, [product]);
 
   const updateProductMutation = useMutation({
     mutationFn: async (updatedProduct: ProductEditForm) => {

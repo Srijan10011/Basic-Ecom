@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import  { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import MapPickerModal from '../../../shared/components/MapPickerModal';
 import { getEnabledPaymentMethods } from '../../../constants/paymentMethods';

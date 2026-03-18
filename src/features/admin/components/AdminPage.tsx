@@ -1,32 +1,24 @@
-import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import {  useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { updateOrderStatus } from '../../orders/services/orderService';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../shared/components/ui/card';
 import { Button } from '../../../shared/components/ui/button';
-import { Badge } from '../../../shared/components/ui/badge';
-import { Input } from '../../../shared/components/ui/input';
-import { Textarea } from '../../../shared/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/components/ui/select';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../../shared/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '../../../shared/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../shared/components/ui/table';
 import { useToast } from '../../../shared/components/ui/use-toast';
-import { ShoppingCart, Package, Users, Edit, Eye, MapPin } from 'lucide-react';
-import { supabase } from '../../../lib/supabaseClient';
-import { useAdminOrdersQuery, useAdminProductsQuery, useCategoriesQuery, AdminOrder } from '../../../lib/utils';
+import { ShoppingCart, Package, Users } from 'lucide-react';
+import { useAdminOrdersQuery, useAdminProductsQuery, useCategoriesQuery } from '../../../lib/utils';
 import { useTotalCustomersQuery } from '../../../shared/utils/queries';
 import OrderStatusTabs from '../../orders/components/OrderStatusTabs';
 import ProductEditDialog from '../../products/components/ProductEditDialog';
 import ProductViewDialog from '../../products/components/ProductViewDialog';
-import ProductCard from '../../products/components/ProductCard';
-import { createProduct, updateProduct } from '../../products/services/productService';
-import { getStatusColor } from '../../../shared/utils/orderHelpers';
+import { createProduct } from '../../products/services/productService';
 import AddProductDialog from './AddProductDialog';
+import AddCategoryDialog from './AddCategoryDialog';
 import { useAdminAuth } from '../hooks/useAdminAuth';
+import { adminService } from '../services/adminService';
 
 // Mock API functions (replace with actual API calls)
 // Mock API functions (replace with actual API calls)
@@ -44,6 +36,7 @@ const productSchema = z.object({
   category: z.string().min(1, "Category is required"),
   rating: z.number().min(0).max(5).optional(),
   reviews: z.number().int().min(0).optional(),
+  stockquantity: z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid stock format"),
   badge: z.string().optional(),
   badgeColor: z.string().optional(),
   details: z.array(z.string()).optional(),
@@ -60,6 +53,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ setCurrentPage }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -93,7 +87,7 @@ const {
     isLoading: categoriesLoading,
     error: categoriesError,
     refetch: refetchCategories
-  } = useCategoriesQuery(isAuthenticated && userRole === 'admin', userId);
+  } = useCategoriesQuery();
 
   // Manual refetch functions
   const handleRefetchOrders = async () => {
@@ -107,6 +101,22 @@ const {
   const handleRefetchCategories = async () => {
     await refetchCategories();
   };
+  const addCategoryMutation = useMutation({
+    mutationFn: ({ name, slug }: { name: string; slug: string }) =>
+      adminService.addCategory(userId as string, name, slug),
+    onSuccess: () => {
+      toast({ title: "Category added", description: "New category created successfully." });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setIsAddCategoryOpen(false);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to add category.", variant: "destructive" });
+    },
+  });
+
+
+
+  
 
   // Product form
   const productForm = useForm<ProductForm>({
@@ -131,6 +141,7 @@ const {
       return await createProduct({
   name: newProduct.name,
   price: parseFloat(newProduct.price),
+  stockquantity: parseInt(newProduct.stockquantity) || 0,
   description: newProduct.description,
   image: newProduct.image,
   category_id: newProduct.category,
@@ -316,7 +327,10 @@ const updateOrderStatusMutation = useMutation({
           </div>
         </div>
 
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-end gap-3 mb-4">
+  <Button onClick={() => setIsAddCategoryOpen(true)} variant="outline" className="dark:text-white dark:border-gray-600 dark:bg-gray-800">
+    Add Category
+  </Button>
   <Button onClick={() => setIsAddProductOpen(true)} className="dark:text-white">Add New Product</Button>
 </div>
 
@@ -327,6 +341,16 @@ const updateOrderStatusMutation = useMutation({
   onSubmit={onSubmitProduct}
   categories={categories}
 />
+
+<AddCategoryDialog
+  open={isAddCategoryOpen}
+  onOpenChange={setIsAddCategoryOpen}
+  onSubmit={(name, slug) => addCategoryMutation.mutate({ name, slug })}
+  isLoading={addCategoryMutation.isPending}
+/>
+
+
+
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

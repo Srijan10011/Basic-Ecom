@@ -1,5 +1,5 @@
 import { supabase } from '../../../lib/supabaseClient';
-import { AdminOrder, OrderItem } from '../../../lib/utils';
+import { AdminOrder } from '../../../lib/utils';
 
 // Authorization helper function
 export const verifyAdminRole = async (userId: string): Promise<boolean> => {
@@ -93,6 +93,19 @@ export const adminService = {
             throw new Error('Unauthorized: Admin access required');
         }
         const { data, error } = await supabase.from("categories").select("*");
+        if (error) throw error;
+        return data;
+    },
+
+    async addCategory(userId: string, name: string, slug: string) {
+        if (!await verifyAdminRole(userId)) {
+            throw new Error('Unauthorized: Admin access required');
+        }
+        const { data, error } = await supabase
+            .from("categories")
+            .insert({ name, slug })
+            .select()
+            .single();
         if (error) throw error;
         return data;
     },

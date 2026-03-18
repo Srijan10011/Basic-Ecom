@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Package, Clock, Mail, User, Calendar, MapPin } from 'lucide-react';
+import  { useState, useEffect } from 'react';
+import { Package ,Calendar, MapPin } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../shared/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../shared/components/ui/card';
 import { Badge } from '../../../shared/components/ui/badge';

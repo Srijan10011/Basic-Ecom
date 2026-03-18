@@ -16,11 +16,12 @@ import ProductCard from './ProductCard';
 
 
 
-export default function Shop({ setCurrentPage, setSelectedProductId, addToCart, addingToCartId }: {
+export default function Shop({ setCurrentPage, setSelectedProductId, addToCart, addingToCartId , cart}: {
   setCurrentPage: (page: string) => void;
   setSelectedProductId: (id: number) => void;
   addToCart: (product: Product) => void;
   addingToCartId: number | null;
+  cart?: any[];
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch] = useDebounce(searchQuery, 300);
@@ -310,6 +311,7 @@ const removeFilter = (filterType: string) => {
                 }}
                 addToCart={addToCart}
                 isAddingToCart={addingToCartId === product.id}
+                cart={cart}
               />
             ))}
           </div>
