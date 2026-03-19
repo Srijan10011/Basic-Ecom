@@ -148,7 +148,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900 dark:text-white">Email</h4>
-                  <p className="text-gray-600 dark:text-gray-300">support@freshshroom.com</p>
+                  <p className="text-gray-600 dark:text-gray-300">AandCMushroomFarm@gmail.com</p>
                 </div>
               </div>
               <div className="flex items-start space-x-4">
@@ -157,7 +157,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900 dark:text-white">Phone</h4>
-                  <p className="text-gray-600 dark:text-gray-300">(123) 456-7890</p>
+                  <p className="text-gray-600 dark:text-gray-300">+977 9846049690</p>
                 </div>
               </div>
               <div className="flex items-start space-x-4">
@@ -166,7 +166,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900 dark:text-white">Address</h4>
-                  <p className="text-gray-600 dark:text-gray-300">123 Mushroom Lane, Sporeville, OR 97123</p>
+                  <p className="text-gray-600 dark:text-gray-300">Pokhara-5, Okm, Gahan Marga, Nepal</p>
                 </div>
               </div>
             </div>

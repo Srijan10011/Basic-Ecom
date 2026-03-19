@@ -7,13 +7,15 @@ interface PaymentSuccessDialogProps {
   onClose: () => void;
   onViewProfile: () => void;
   onTrackOrder: () => void;
+  isGuest?: boolean;
 }
 
 export default function PaymentSuccessDialog({
   open,
   onClose,
   onViewProfile,
-  onTrackOrder
+  onTrackOrder,
+  isGuest = false
 }: PaymentSuccessDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -46,12 +48,14 @@ export default function PaymentSuccessDialog({
 
           {/* Action Buttons */}
           <div className="flex flex-col gap-3">
-            <button
-              onClick={onViewProfile}
-              className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition-colors"
-            >
-              View in Profile
-            </button>
+            {!isGuest && (
+              <button
+                onClick={onViewProfile}
+                className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition-colors"
+              >
+                View in Profile
+              </button>
+            )}
             <button
               onClick={onTrackOrder}
               className="w-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white py-3 rounded-lg font-semibold transition-colors"

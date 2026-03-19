@@ -2,7 +2,7 @@
 import { Check, Users, Award, Leaf, Heart, Globe } from 'lucide-react';
 
 const certifications = [
-  '100% Organic Certification',
+  '100% Organic farming',
   'Sustainable Farming Practices',
   'Fresh Harvest Guarantee',
   'Expert Cultivation Support',
@@ -10,31 +10,30 @@ const certifications = [
 ];
 
 const stats = [
-  { number: '20+', label: 'Years of Experience' },
-  { number: '10,000+', label: 'Happy Customers' },
-  { number: '50+', label: 'Mushroom Varieties' },
-  { number: '100%', label: 'Organic Certified' }
+  { number: '5+', label: 'Years of Experience' },
+  { number: '0', label: 'Happy Customers' },
+  { number: '5+', label: 'Different Mushroom Varieties' },
+  { number: '100%', label: 'Organic ' }
   
 ];
-
 const teamMembers = [
   {
-    name: 'Sarah Mitchell',
-    role: 'Founder & Head Cultivator OOh yea',
-    initials: 'PM',
-    description: 'With over 25 years in organic farming, Sarah founded FreshShroom with a vision to bring premium mushrooms to every table.'
+    name: 'Sajjan Acharya',
+    role: 'Senior Cultivator',
+    initials: 'SA',
+    description: 'With many years of farming experience, Sajjan brings deep knowledge of mushroom cultivation and sustainable practices.'
   },
   {
-    name: 'David Chen',
-    role: 'Mycologist & Quality Director',
-    initials: 'DC',
-    description: 'David ensures every mushroom meets our highest standards through scientific cultivation methods and quality control.'
+    name: 'Srijan Acharya',
+    role: 'Packaging & Management',
+    initials: 'SA',
+    description: 'Handling day-to-day operations and connecting with customers to ensure the best experience.'
   },
   {
-    name: 'Maria Rodriguez',
-    role: 'Sustainability Manager',
-    initials: 'MR',
-    description: 'Maria leads our environmental initiatives, ensuring our farming practices protect and nurture the ecosystem.'
+    name: 'Staff Members',
+    role: 'Production Team',
+    initials: 'SM',
+    description: 'Dedicated team members helping with cultivation, innoculation, and packaging.'
   }
 ];
 
@@ -120,16 +119,10 @@ export default function About({ setCurrentPage }: { setCurrentPage: (page: strin
                 From Our Farm to Your Table
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                FreshShroom began in 1999 when Sarah Mitchell inherited her grandmother's small farm 
-                in the rolling hills of Oregon. What started as a hobby growing shiitake mushrooms 
-                in her backyard has grown into one of the most trusted organic mushroom suppliers 
-                in the Pacific Northwest.
+                A and C Mushroom was founded in 2020 with a mission to provide high-quality mushroom spawn and fresh mushrooms to local farmers and communities. What started as a small initiative has grown into a trusted supplier of  mushroom products in Nepal.
               </p>
               <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-                Our family-owned farm has been cultivating premium mushrooms for over two decades, 
-                using sustainable farming practices that respect both nature and tradition. We believe 
-                that the best mushrooms come from healthy soil, clean water, and careful attention 
-                to every step of the growing process.
+                Our focus is on supporting local agriculture by providing reliable mushroom cultivation materials and fresh produce. We believe in sustainable practices, quality control, and building strong relationships with the farming communities we serve.
               </p>
               
               <div className="space-y-4 mb-8">
@@ -244,7 +237,7 @@ export default function About({ setCurrentPage }: { setCurrentPage: (page: strin
             but a better world."
           </p>
           <div className="text-green-300 font-semibold">
-            - Sarah Mitchell, Founder
+            - Sajjan Acharya
           </div>
         </div>
       </section>

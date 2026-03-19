@@ -8,14 +8,14 @@ const features = [
     description: 'Certified organic mushrooms grown without harmful chemicals'
   },
   {
-    icon: <Truck className="h-10 w-10 md:h-12 md:w-12 text-green-600" />,
-    title: 'Free Delivery',
-    description: 'Fast and free shipping on all orders over Rs 50'
-  },
+  icon: <Truck className="h-10 w-10 md:h-12 md:w-12 text-green-600" />,
+  title: 'Affordable Delivery',
+  description: 'Fast delivery across Pokhara & Valley areas.'
+},
   {
     icon: <Shield className="h-10 w-10 md:h-12 md:w-12 text-green-600" />,
     title: 'Quality Guarantee',
-    description: 'Premium quality products with satisfaction guarantee'
+    description: 'Quality products with satisfaction guarantee'
   },
   {
     icon: <Clock className="h-10 w-10 md:h-12 md:w-12 text-green-600" />,

@@ -364,6 +364,7 @@ const handleFieldChange = (fieldName: string, value: string) => {
           clearCart={clearCart}
           setCurrentPage={setCurrentPage}
           setTrackOrderId={setTrackOrderId}
+          session={session}
         />
       )}
     </div>

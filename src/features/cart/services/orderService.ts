@@ -90,6 +90,7 @@ export const createOrder = async (
       price: item.price,
     })),
     shipping_fee: shippingFee.toFixed(2),  // add this line
+    customer_email: sanitizeEmail(form.email),
   };
 
   const customerInfo = {
@@ -123,6 +124,17 @@ export const createOrder = async (
     const { data: customerDetail } = await supabase
       .from('customer_detail')
       .insert([{ user_id: currentUser.id, ...customerInfo }])
+      .select()
+      .single();
+
+    if (customerDetail) {
+      orderData.customer_detail_id = customerDetail.id;
+    }
+  } else {
+    // Handle guest user - insert into customer_detail with user_id = null
+    const { data: customerDetail } = await supabase
+      .from('customer_detail')
+      .insert([{ user_id: null, ...customerInfo  }])
       .select()
       .single();
 

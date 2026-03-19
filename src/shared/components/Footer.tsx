@@ -13,10 +13,10 @@ export default function Footer({ setCurrentPage }: FooterProps) {
           <div className="col-span-1 lg:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
               <Leaf className="h-8 w-8 text-green-500" />
-              <span className="text-xl font-bold text-white">FreshShroom</span>
+              <span className="text-xl font-bold text-white">A and C mushroom</span>
             </div>
             <p className="text-gray-400 mb-6 max-w-md leading-relaxed">
-              Your trusted source for premium organic mushrooms, cultivation kits, and expert growing advice. 
+              Your trusted source for organic mushrooms, cultivation kits, and expert growing advice. 
               From our farm to your table with love and care.
             </p>
             <div className="flex space-x-4">
@@ -51,7 +51,7 @@ export default function Footer({ setCurrentPage }: FooterProps) {
         </div>
         
         <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500">
-          <p>&copy; 2024 FreshShroom. All rights reserved. | Privacy Policy | Terms of Service</p>
+          <p>&copy; 2025 A and C mushroom. All rights reserved. | Privacy Policy | Terms of Service</p>
         </div>
       </div>
     </footer>

@@ -1,5 +1,5 @@
 import { supabase } from '../../../lib/supabaseClient';
-
+import { sendWelcomeEmail } from './emailservice';
 export const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -33,4 +33,5 @@ export const createProfile = async (userId: string, firstName: string, lastName:
         email: email,
         role: 'user'
     }]);
+    await sendWelcomeEmail(firstName, email);
 };

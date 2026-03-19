@@ -37,7 +37,7 @@ export default function Header({ currentPage = 'home', setCurrentPage, setModal,
   }, [profile]);
 
   // Check connection status periodically
-  useEffect(() => {
+  /* useEffect(() => {
     const checkConnectionStatus = async () => {
       try {
         const { isConnected: connected } = await checkConnection();
@@ -55,7 +55,7 @@ export default function Header({ currentPage = 'home', setCurrentPage, setModal,
     const interval = setInterval(checkConnectionStatus, 120000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, []); */
 
   const handleLogout = async () => {
     try {
@@ -99,7 +99,7 @@ export default function Header({ currentPage = 'home', setCurrentPage, setModal,
               className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
             >
               <Leaf className="h-6 w-6 md:h-8 md:w-8 text-green-600" />
-              <span className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">FreshShroom</span>
+              <span className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">A and C Mushroom</span>
             </button>
           </div>
           

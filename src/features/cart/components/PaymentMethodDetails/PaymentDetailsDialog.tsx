@@ -4,6 +4,7 @@ import { paymentConfigs } from '../../../../constants/paymentConfig';
 import PaymentSuccessDialog from '../../../../shared/components/ui/PaymentSuccessDialog';
 import { supabase } from '../../../../lib/supabaseClient';
 import { sanitizeUrl } from '../../../../lib/sanitize';
+import { sendOrderConfirmationEmail } from '../../../auth/services/emailservice';
 interface PaymentDetailsDialogProps {
   open: boolean;
   onClose: () => void;
@@ -15,6 +16,7 @@ interface PaymentDetailsDialogProps {
   setCurrentPage: (page: string) => void;
   setTrackOrderId: (id: string) => void;
   orderNumber: string;
+  session?: any;
 }
 
 export default function PaymentDetailsDialog({
@@ -28,6 +30,7 @@ export default function PaymentDetailsDialog({
   setCurrentPage,
   setTrackOrderId,
   orderNumber,
+  session,
 }: PaymentDetailsDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [screenshot, setScreenshot] = useState<File | null>(null);
@@ -88,6 +91,43 @@ const [showSuccessDialog, setShowSuccessDialog] = useState(false);
     // Invalidate orders query cache
     
 await clearCart();
+
+// Fetch order with customer_detail
+const { data: orderData, error: orderError } = await supabase
+  .from('orders')
+  .select(`
+    id,
+    order_number,
+    total_amount,
+    payment_method,
+    payment_status,
+    payment_reference_id,
+    customer_email,
+    customer_detail_id,
+
+    items,
+    customer_detail:customer_detail_id(
+      customer_name,
+      shipping_address
+    )
+  `)
+  .eq('id', orderId)
+  .single();
+
+if (orderError) {
+  console.error("Order fetch error:", orderError);
+}
+
+if (orderData) {
+  console.log("1");
+  // Use customer_email from orders table or from customer_detail
+  const email = orderData.customer_email  || '';
+  if (email) {
+    console.log(email);
+    await sendOrderConfirmationEmail(orderData, email);
+  }
+}
+console.log("2");
     setShowSuccessDialog(true);
     
   } catch (error: any) {
@@ -206,6 +246,7 @@ await clearCart();
   setTrackOrderId(orderNumber);
   setCurrentPage('track-order');
 }}
+        isGuest={!session?.user}
       />
     </Dialog>
   );

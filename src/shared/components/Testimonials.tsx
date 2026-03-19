@@ -52,7 +52,7 @@ export default function Testimonials() {
             What Our Customers Say
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Join thousands of satisfied customers who trust FreshShroom for their
+            Join thousands of satisfied customers who trust A and C Mushroom for their
             mushroom needs
           </p>
         </div>

@@ -45,45 +45,50 @@ export default function GuestOrderAccess({ setCurrentPage }: GuestOrderAccessPro
   const [currentSession, setCurrentSession] = useState<GuestSession | null>(null);
   const [loading, setLoading] = useState(true); // Add loading state
 
-  useEffect(() => {
+    useEffect(() => {
     const loadAndFetchGuestOrders = async () => {
       setLoading(true);
       const sessions = JSON.parse(localStorage.getItem('guestSessions') || '[]');
-      // No filtering based on expiration as per previous user request to remove expiration
-      // If expiration is still desired, the filter should be re-added here.
 
-      // Fetch latest status for each session from Supabase
-      const updatedSessions = await Promise.all(sessions.map(async (session: GuestSession) => {
-        const { data, error } = await supabase
-          .from('orders')
-          .select('status')
-          .eq('id', session.orderId)
-          .single();
+      if (sessions.length === 0) {
+        setGuestSessions([]);
+        setLoading(false);
+        return;
+      }
 
-        if (error) {
-          console.error(`Error fetching status for order ${session.orderId}:`, error);
-          return session; // Return original session if fetch fails
-        }
+      // Fetch all order statuses in a single query
+      const orderIds = sessions.map((s: GuestSession) => s.orderId);
+      const { data, error } = await supabase
+        .from('orders')
+        .select('id, status')
+        .in('id', orderIds);
 
-        if (data && data.status) {
-          return {
-            ...session,
-            orderData: {
-              ...session.orderData,
-              status: data.status,
-            },
-          };
-        }
-        return session;
+      if (error) {
+        console.error('Error fetching order statuses:', error);
+        setLoading(false);
+        return;
+      }
+
+      // Create a map of order_id -> status
+      const statusMap: Record<string, string> = {};
+      data.forEach((order: any) => {
+        statusMap[order.id] = order.status;
+      });
+
+      // Update sessions with fetched statuses
+      const updatedSessions = sessions.map((session: GuestSession) => ({
+        ...session,
+        orderData: {
+          ...session.orderData,
+          status: statusMap[session.orderId] || session.orderData.status,
+        },
       }));
 
-      // Update localStorage with potentially new statuses
-      // Update localStorage with potentially new statuses
-      // Update localStorage with potentially new statuses
+      // Update localStorage
       localStorage.setItem('guestSessions', JSON.stringify(updatedSessions));
-
+      
       // Sort by order date descending (newest first)
-      const sortedSessions = updatedSessions.sort((a, b) =>
+      const sortedSessions = updatedSessions.sort((a: GuestSession, b: GuestSession) =>
         new Date(b.orderData.order_date).getTime() - new Date(a.orderData.order_date).getTime()
       );
 
@@ -92,7 +97,7 @@ export default function GuestOrderAccess({ setCurrentPage }: GuestOrderAccessPro
     };
 
     loadAndFetchGuestOrders();
-  }, []); // Empty dependency array to run only once on mount
+  }, []);
 
   
 
