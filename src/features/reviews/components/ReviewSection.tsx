@@ -103,7 +103,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ productId, userId, existingRevi
   };
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg border dark:border-gray-700">
+    <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg border-2 border-gray-200 dark:border-gray-600">
       <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
         {existingReview ? 'Update Your Review' : 'Write a Review'}
       </h3>
@@ -133,24 +133,29 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ productId, userId, existingRevi
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-            Image (optional)
-          </label>
-          <div className="flex items-center space-x-4">
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="w-full"
-            />
-            {imageFile && (
-              <img src={URL.createObjectURL(imageFile)} alt="Preview" className="h-16 w-16 object-cover rounded-md" />
-            )}
-            {!imageFile && existingReview?.image_url && (
-              <img src={existingReview.image_url} alt="Existing review image" className="h-16 w-16 object-cover rounded-md" />
-            )}
-          </div>
-        </div>
+  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+    Image (optional)
+  </label>
+  <div className="flex items-center space-x-4">
+    <div className="relative overflow-hidden rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
+      <Input
+        type="file"
+        accept="image/*"
+        onChange={handleImageChange}
+        className="absolute inset-0 opacity-0 cursor-pointer"
+      />
+      <div className="px-3 py-2 text-sm text-gray-700 dark:text-gray-200">
+        {imageFile ? imageFile.name : "Choose file"}
+      </div>
+    </div>
+    {imageFile && (
+      <img src={URL.createObjectURL(imageFile)} alt="Preview" className="h-16 w-16 object-cover rounded-md" />
+    )}
+    {!imageFile && existingReview?.image_url && (
+      <img src={existingReview.image_url} alt="Existing review image" className="h-16 w-16 object-cover rounded-md" />
+    )}
+  </div>
+</div>
 
         <div className="flex space-x-3">
           <Button
@@ -165,6 +170,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ productId, userId, existingRevi
             type="button"
             variant="outline"
             onClick={onCancel}
+            className="text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             Cancel
           </Button>
@@ -273,7 +279,7 @@ const ReviewItem: React.FC<{
             variant="outline"
             size="sm"
             onClick={() => setShowOwnerReplyForm(true)}
-            className="mt-4"
+            className="mt-4 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             Reply to Review
           </Button>
@@ -290,7 +296,7 @@ const ReviewItem: React.FC<{
               placeholder="Type your reply here..."
             />
             <div className="flex justify-end space-x-2 mt-2">
-              <Button variant="outline" size="sm" onClick={() => setShowOwnerReplyForm(false)}>
+              <Button variant="outline" size="sm" onClick={() => setShowOwnerReplyForm(false)} className="text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
                 Cancel
               </Button>
               <Button size="sm" onClick={handleSubmitOwnerReply} disabled={submitOwnerReplyMutation.isPending}>
@@ -416,7 +422,7 @@ export default function ReviewSection({ productId, userId }: ReviewSectionProps)
       {userId && (
         <div className="mb-8">
           {!canReview && !userReview && (
-            <div className="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
+             <div className="bg-yellow-50 dark:bg-yellow-900/30 border-2 border-yellow-200 dark:border-yellow-600 rounded-lg p-4">
               <div className="flex items-center space-x-2">
                 <MessageCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
                 <p className="text-yellow-800 dark:text-yellow-200">
@@ -436,7 +442,7 @@ export default function ReviewSection({ productId, userId }: ReviewSectionProps)
           )}
 
           {userReview && !showReviewForm && (
-            <div className="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg p-2 sm:p-4">
+             <div className="bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-700 rounded-lg p-2 sm:p-4">
               <div className="flex flex-wrap items-center justify-between w-full">
                 <p className="text-blue-800 dark:text-blue-200 mb-2 sm:mb-0 mr-4 min-w-0">You have already reviewed this product.</p>
                   <div className="flex space-x-2 shrink-0">
@@ -444,7 +450,7 @@ export default function ReviewSection({ productId, userId }: ReviewSectionProps)
                       variant="outline"
                       size="sm"
                       onClick={handleEditReview}
-                      className="text-blue-600 hover:text-blue-800"
+                      className="text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600 hover:bg-blue-100 dark:hover:bg-blue-800"
                     >
                       Edit Review
                     </Button>
@@ -452,7 +458,7 @@ export default function ReviewSection({ productId, userId }: ReviewSectionProps)
                       variant="outline"
                       size="sm"
                       onClick={handleDeleteReview}
-                      className="text-red-600 hover:text-red-800"
+                      className="text-red-600 dark:text-red-400 border-red-300 dark:border-red-600 hover:bg-red-50 dark:hover:bg-red-900/30"
                     >
                       Delete Review
                     </Button>
@@ -469,6 +475,7 @@ export default function ReviewSection({ productId, userId }: ReviewSectionProps)
                 existingReview={editingReview}
                 onSuccess={handleFormSuccess}
                 onCancel={handleFormCancel}
+
               />
             </div>
           )}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase, retryOperation } from '../../../lib/supabaseClient';
-
+import { useProductReviewStatsQuery } from '../../reviews/services/reviewQueries';
 import { Star, ShoppingCart, Heart, Share2, ArrowLeft, MapPin } from 'lucide-react';
 import ReviewSection from '../../reviews/components/ReviewSection';
 import { useProductQuery } from '../hooks/useProductsQuery';
@@ -31,6 +31,7 @@ interface ProductDetailProps {
 export default function ProductDetail({ productId, setCurrentPage, addToCart, session, addingToCartId, cart }: ProductDetailProps) {
   const [loading, setLoading] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const { data: reviewStats } = useProductReviewStatsQuery(productId);
   const [error, setError] = useState<string | null>(null);
   // Use React Query for data fetching with automatic refetching
   
@@ -104,9 +105,14 @@ export default function ProductDetail({ productId, setCurrentPage, addToCart, se
   }
   const cartItem = cart?.find(i => i.id === product.id);
 const currentQtyInCart = cartItem ? cartItem.quantity : 0;
-const canAddMore = currentQtyInCart + quantity <= product.stockquantity
+const canAddMore = currentQtyInCart + quantity <= (product.stockquantity ?? 0);
+const outOfStock = product.stockquantity === 0;
+const disabled = addingToCartId === product.id || outOfStock || !canAddMore;
+
+
   
 
+  const averageRating = reviewStats?.average_rating ?? product.rating
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -133,11 +139,11 @@ const canAddMore = currentQtyInCart + quantity <= product.stockquantity
                   <Star
                     key={i}
                     className={`h-5 w-5 ${
-                      i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300 dark:text-gray-600'
+                      i < Math.floor(averageRating ?? 0) ? 'text-yellow-400 fill-current' : 'text-gray-300 dark:text-gray-600'
                     }`}
                   />
                 ))}
-                <span className="ml-2 text-gray-600 dark:text-gray-300 text-sm">({product.rating}/5)</span>
+                <span className="ml-2 text-gray-600 dark:text-gray-300 text-sm">({averageRating}/5)</span>
               </div>
             </div>
             <p className="text-gray-700 dark:text-gray-200 text-lg mb-6 leading-relaxed">{product.description}</p>
@@ -153,13 +159,28 @@ const canAddMore = currentQtyInCart + quantity <= product.stockquantity
             </div>
 
             <button
-              onClick={() => addToCart(product)}
-              disabled={addingToCartId === product.id || product.stockquantity === 0 || quantity >= product.stockquantity || !canAddMore}
-              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-3 rounded-lg font-semibold text-lg flex items-center justify-center space-x-2 transition-colors transform hover:scale-105 disabled:transform-none"
-            >
-              <ShoppingCart className="h-6 w-6" />
-              <span>{product.stockquantity === 0 ? 'Out of Stock' : addingToCartId === product.id ? 'Adding...' : 'Add to Cart'}</span>
-            </button>
+  onClick={() => addToCart(product)}
+  disabled={disabled}
+  className={`w-full py-3 rounded-lg font-semibold text-lg flex items-center justify-center space-x-2 transition-colors transform hover:scale-105 disabled:transform-none ${
+    outOfStock
+      ? 'bg-gray-400 cursor-not-allowed text-white'
+      : disabled
+        ? 'bg-gray-400 cursor-not-allowed text-white'
+        : 'bg-green-600 hover:bg-green-700 text-white'
+  }`}
+>
+  <ShoppingCart className="h-6 w-6" />
+  <span>
+    {outOfStock
+      ? 'Out of Stock'
+      : disabled
+        ? `Only ${product.stockquantity} available`
+        : addingToCartId === product.id
+          ? 'Adding...'
+          : 'Add to Cart'
+    }
+  </span>
+</button>
           </div>
         </div>
 
