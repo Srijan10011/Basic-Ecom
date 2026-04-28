@@ -8,7 +8,7 @@ export interface PaymentMethodConfig {
 export const paymentConfigs: Record<string, PaymentMethodConfig> = {
     esewa: {
         id: 'esewa',
-        accountId: '9876543210',
+        accountId: '9765652637',
         qrCodeUrl: '/images/esewa-qr.png', // Add your QR image to public folder
         instructions: [
             'Scan QR code or send to eSewa ID above',
@@ -20,7 +20,7 @@ export const paymentConfigs: Record<string, PaymentMethodConfig> = {
     },
     khalti: {
         id: 'khalti',
-        accountId: '9876543210',
+        accountId: '9765652637',
         qrCodeUrl: '/images/khalti-qr.png',
         instructions: [
             'Scan QR code or send to Khalti number above',
@@ -31,16 +31,5 @@ export const paymentConfigs: Record<string, PaymentMethodConfig> = {
         ]
     },
 
-    yoo: {
-        id: 'yoo',
-        accountId: '9876543210',
-        qrCodeUrl: '/images/yoo-qr.png',
-        instructions: [
-            'Scan QR code or send to yoo number above',
-            'Enter the exact amount shown',
-            '⚠️ IMPORTANT: Add the Payment Reference ID in remarks/description',
-            'Complete the payment',
-            'Click "I have paid" button below'
-        ]
-    },
+    
 };
