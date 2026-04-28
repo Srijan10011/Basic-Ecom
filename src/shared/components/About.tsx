@@ -70,14 +70,14 @@ export default function About({ setCurrentPage }: { setCurrentPage: (page: strin
         <picture>
           <source
             media="(min-width: 1280px)"
-            srcSet="/assets/images/hero-bg.webp"
+            srcSet="/public/images/hero-bg.webp"
           />
           <source
             media="(min-width: 768px)"
-            srcSet="/assets/images/hero-bg.webp"
+            srcSet="/public/images/hero-bg.webp"
           />
           <img loading="lazy"
-            src="/assets/images/hero-bg.webp"
+            src="/public/images/hero-bg.webp"
             alt="A lush green valley with a river running through it"
             className="absolute inset-0 w-full h-full object-cover"
           />
