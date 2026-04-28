@@ -13,14 +13,14 @@ export default function Hero({ setCurrentPage, setModal, session }: HeroProps) {
       <picture>
         <source
           media="(min-width: 1280px)"
-          srcSet="https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&dpr=1"
+          srcSet="/assets/images/product-bg.webp"
         />
         <source
           media="(min-width: 768px)"
-          srcSet="https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1"
+          srcSet="/assets/images/product-bg.webp"
         />
-        <img
-          src="https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?auto=compress&cs=tinysrgb&w=640&h=480&dpr=1"
+        <img loading="lazy"
+          src="/assets/images/product-bg.webp"
           alt="A lush green valley with a river running through it"
           className="absolute inset-0 w-full h-full object-cover"
         />

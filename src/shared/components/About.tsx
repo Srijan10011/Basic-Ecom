@@ -1,4 +1,5 @@
 
+import { SEO } from './SEO';
 import { Check, Users, Award, Leaf, Heart, Globe } from 'lucide-react';
 
 const certifications = [
@@ -63,19 +64,20 @@ const values = [
 export default function About({ setCurrentPage }: { setCurrentPage: (page: string) => void }) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <SEO title="About Us | Mushroom Spawn Supplier in Nepal" description="Learn about A & C Mushroom Farm in Pokhara, Nepal. We specialize in high-quality Shiitake, Oyster, and Reishi mushroom spawn production." />
       {/* Hero Section */}
       <section className="relative">
         <picture>
           <source
             media="(min-width: 1280px)"
-            srcSet="https://images.pexels.com/photos/1367242/pexels-photo-1367242.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&dpr=1"
+            srcSet="/assets/images/hero-bg.webp"
           />
           <source
             media="(min-width: 768px)"
-            srcSet="https://images.pexels.com/photos/1367242/pexels-photo-1367242.jpeg?auto=compress&cs=tinysrgb&w=1280&h=720&dpr=1"
+            srcSet="/assets/images/hero-bg.webp"
           />
-          <img
-            src="https://images.pexels.com/photos/1367242/pexels-photo-1367242.jpeg?auto=compress&cs=tinysrgb&w=640&h=480&dpr=1"
+          <img loading="lazy"
+            src="/assets/images/hero-bg.webp"
             alt="A lush green valley with a river running through it"
             className="absolute inset-0 w-full h-full object-cover"
           />
@@ -140,15 +142,15 @@ export default function About({ setCurrentPage }: { setCurrentPage: (page: strin
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-4">
                 <div className="aspect-w-3 aspect-h-4">
-                  <img 
-                    src="https://images.pexels.com/photos/1367242/pexels-photo-1367242.jpeg?auto=compress&cs=tinysrgb&w=300&h=400&dpr=1"
+                  <img loading="lazy" 
+                    src="/assets/images/hero-bg.webp"
                     alt="Fresh vegetables"
                     className="w-full h-full object-cover rounded-lg shadow-lg hover:shadow-xl transition-shadow"
                   />
                 </div>
                 <div className="aspect-w-3 aspect-h-2">
-                  <img 
-                    src="https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?auto=compress&cs=tinysrgb&w=300&h=200&dpr=1"
+                  <img loading="lazy" 
+                    src="/assets/images/product-bg.webp"
                     alt="Landscape"
                     className="w-full h-full object-cover rounded-lg shadow-lg hover:shadow-xl transition-shadow"
                   />
@@ -156,8 +158,8 @@ export default function About({ setCurrentPage }: { setCurrentPage: (page: strin
               </div>
               <div className="mt-8">
                 <div className="aspect-w-3 aspect-h-5">
-                  <img 
-                    src="https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?auto=compress&cs=tinysrgb&w=300&h=500&dpr=1"
+                  <img loading="lazy" 
+                    src="/assets/images/product-bg.webp"
                     alt="Mountain landscape"
                     className="w-full h-full object-cover rounded-lg shadow-lg hover:shadow-xl transition-shadow"
                   />

@@ -1,4 +1,4 @@
-
+import { SEO } from './shared/components/SEO';
 import  { useState, useEffect } from 'react';
 import Header from './shared/components/Header';
 import Hero from './shared/components/Hero';
@@ -146,45 +146,64 @@ function App() {
       case 'about':
         return (
           <div>
+           <SEO />
+          <div>
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
             <About setCurrentPage={setCurrentPage} />
             <Footer setCurrentPage={setCurrentPage} />
           </div>
+          </div>
         );
       case 'shop':
         return (
+        <div>
+          <SEO />
           <div>
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
               <Shop setCurrentPage={setCurrentPage} setSelectedProductId={setSelectedProductId} addToCart={addToCart} addingToCartId={addingToCartId}  />
             <Footer setCurrentPage={setCurrentPage} />
           </div>
+        </div>
+            
+        
+          
+          
+          
         );
       case 'contact':
         return (
           <div>
+            <SEO />
+            <div>
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
             <Contact />
             <Footer setCurrentPage={setCurrentPage} />
-          </div>
+          </div></div>
         );
       case 'track-order':
         return (
           <div>
+            <SEO />
+            <div>
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
 <TrackOrder prefilledOrderId={trackOrderId} />            <Footer setCurrentPage={setCurrentPage} />
-          </div>
+          </div></div>
         );
       case 'product-detail':
         return (
           <div>
+              <SEO />
+              <div>
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
             <ProductDetail productId={selectedProductId} setCurrentPage={setCurrentPage} addToCart={addToCart} session={session} addingToCartId={addingToCartId} />
             <Footer setCurrentPage={setCurrentPage} />
-          </div>
+          </div></div>
         );
       case 'profile':
         return (
           <div>
+            <SEO />
+            <div>
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
             <Profile
   session={session}
@@ -192,27 +211,33 @@ function App() {
   setResumeOrderId={setResumeOrderId}
 />
             <Footer setCurrentPage={setCurrentPage} />
-          </div>
+          </div></div>
         );
       case 'update-profile':
         return (
           <div>
+            <SEO />
+            <div>
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
             <UpdateProfile setCurrentPage={setCurrentPage} />
             <Footer setCurrentPage={setCurrentPage} />
-          </div>
+          </div></div>
         );
       case 'cart':
         return (
           <div>
+              <SEO />
+              <div>
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
             <Cart cart={cart} setCurrentPage={setCurrentPage} updateCartQuantity={updateCartQuantity} removeFromCart={removeFromCart} clearCart={clearCart} />
             <Footer setCurrentPage={setCurrentPage} />
-          </div>
+          </div></div>
         );
       case 'checkout':
         return (
           <div>
+              <SEO />
+              <div>
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
             <Checkout
   cart={cart}
@@ -224,11 +249,12 @@ function App() {
   setTrackOrderId={setTrackOrderId}
 />
             <Footer setCurrentPage={setCurrentPage} />
-          </div>
+          </div></div>
         );
       case 'admin':
         return (
           <div>
+              
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
             <AdminPage setCurrentPage={setCurrentPage} />
             <Footer setCurrentPage={setCurrentPage} />
@@ -237,15 +263,20 @@ function App() {
       case 'guestOrder':
         return (
           <div>
+              <SEO />
+            <div>
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
             <GuestOrderAccess setCurrentPage={setCurrentPage} />
             <Footer setCurrentPage={setCurrentPage} />
-          </div>
+          </div></div>
         );
       case 'home':
       default:
         return (
+          
           <div>
+            <SEO />
+            <div>
             <Header currentPage={currentPage} setCurrentPage={setCurrentPage} setModal={setModal} session={session} cart={cart} theme={theme} toggleTheme={toggleTheme} />
             <Hero setCurrentPage={setCurrentPage} setModal={setModal} session={session} />
             <Features />
@@ -253,7 +284,7 @@ function App() {
             <Testimonials />
             <Newsletter />
             <Footer setCurrentPage={setCurrentPage} />
-          </div>
+          </div></div>
         );
     }
   };

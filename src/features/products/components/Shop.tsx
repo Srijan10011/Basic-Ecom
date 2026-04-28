@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
+import { SEO } from '../../../shared/components/SEO';
 import { Search, Filter, X, RefreshCw } from 'lucide-react';
 import { useProductsRatingsQuery } from '../hooks/productRatingHooks';
 import Pagination from '../../../shared/components/ui/Pagination';
@@ -131,6 +132,7 @@ const removeFilter = (filterType: string) => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <SEO title="Buy Mushroom Spawn Online in Nepal | A & C Farm" description="Shop Shiitake, Oyster, and Reishi mushroom spawn online in Nepal. Fast delivery across the country." />
       {/* Page Header */}
       <section className="bg-green-800 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -39,6 +39,7 @@ const [calculatingShipping, setCalculatingShipping] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reconstructedCart, setReconstructedCart] = useState<CartItem[]>([]);
   const [isResumingOrder, setIsResumingOrder] = useState(false);
+  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
 
   const { form, updateField, setFormData } = useCheckoutForm(session, user, resumeOrderId);
   const payment = usePaymentFlow();
@@ -116,7 +117,25 @@ const handleFieldChange = (fieldName: string, value: string) => {
         console.log('Guest checkout');
       }
 
+      // If order already exists for this checkout session, reuse it
+      if (currentOrderId) {
+        const { data: order } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('id', currentOrderId)
+          .single();
+        
+        if (order) {
+          payment.setOrderInfo(order.id, order.payment_reference_id, order.total_amount);
+          payment.setOrderNumber(order.order_number);
+          payment.openPaymentDialog();
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       const order = await createOrder(form, displayCart, currentUser, form.location!, shippingFee);
+      setCurrentOrderId(order.id);
 
       payment.setOrderInfo(order.id, order.payment_reference_id, order.total_amount);
       payment.setOrderNumber(order.order_number);
@@ -312,7 +331,7 @@ const handleFieldChange = (fieldName: string, value: string) => {
                 >
                   {isResumingOrder 
                     ? `Proceed to Payment - Rs ${(totalPrice + shippingFee).toFixed(2)}`
-                    : `${isSubmitting ? 'Processing...' : 'Place Order'} - Rs ${(totalPrice + shippingFee).toFixed(2)}`
+                    : `${isSubmitting ? 'Processing...' : currentOrderId ? 'Proceed to Payment' : 'Place Order'} - Rs ${(totalPrice + shippingFee).toFixed(2)}`
                   }
                 </button>
                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-4">By placing your order, you agree to our terms and conditions.</p>

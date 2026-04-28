@@ -30,10 +30,10 @@ export default function Footer({ setCurrentPage }: FooterProps) {
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><button onClick={() => setCurrentPage('home')} className="hover:text-white transition-colors">Home</button></li>
-              <li><button onClick={() => setCurrentPage('shop')} className="hover:text-white transition-colors">Shop</button></li>
-              <li><button onClick={() => setCurrentPage('about')} className="hover:text-white transition-colors">About</button></li>
-              <li><button onClick={() => setCurrentPage('contact')} className="hover:text-white transition-colors">Contact</button></li>
+              <li><button onClick={() => { setCurrentPage('home'); window.scrollTo(0, 0); }} className="hover:text-white transition-colors">Home</button></li>
+              <li><button onClick={() => {setCurrentPage('shop'); window.scrollTo(0, 0); }} className="hover:text-white transition-colors">Shop</button></li>
+              <li><button onClick={() => {setCurrentPage('about'); window.scrollTo(0, 0); }} className="hover:text-white transition-colors">About</button></li>
+              <li><button onClick={() => {setCurrentPage('contact'); window.scrollTo(0, 0); }} className="hover:text-white transition-colors">Contact</button></li>
               <li><a href="#" className="hover:text-white transition-colors">Growing Guide</a></li>
             </ul>
           </div>
@@ -45,7 +45,7 @@ export default function Footer({ setCurrentPage }: FooterProps) {
               <li><a href="#" className="hover:text-white transition-colors">Shipping Info</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Returns</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Customer Service</a></li>
-              <li><button onClick={() => setCurrentPage('track-order')} className="hover:text-white transition-colors">Track Order</button></li>
+              <li><button onClick={() => { setCurrentPage('track-order'); window.scrollTo(0, 0); }} className="hover:text-white transition-colors">Track Order</button></li>
             </ul>
           </div>
         </div>

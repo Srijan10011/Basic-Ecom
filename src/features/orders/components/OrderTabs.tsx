@@ -25,6 +25,7 @@ const OrderList = ({ orders, onCompletePayment }: { orders: any[], onCompletePay
                 : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
             }`}
           >
+            
             {order.payment_status === 'awaiting_payment' 
               ? 'Awaiting Payment'
               : order.status.charAt(0).toUpperCase() + order.status.slice(1)}
@@ -66,10 +67,12 @@ const OrderList = ({ orders, onCompletePayment }: { orders: any[], onCompletePay
       </div>
     ))}
   </div>
+  
 );
-
+  
 const OrderTabs = ({ orders, onCompletePayment }: { orders: any[], onCompletePayment?: (order: any) => void }) => {  
-  const [activeTab, setActiveTab] = useState('awaiting_payment');
+  const [activeTab, setActiveTab] = useState('all');
+   const allOrders = orders;
 
   const awaitingPaymentOrders = orders.filter(
     (order) => order.payment_status === 'awaiting_payment'
@@ -86,6 +89,7 @@ const OrderTabs = ({ orders, onCompletePayment }: { orders: any[], onCompletePay
   return (
     <div>
       <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4 overflow-x-auto">
+        
         <button
           onClick={() => setActiveTab('awaiting_payment')}
           className={`px-4 py-2 font-medium text-sm whitespace-nowrap ${
@@ -116,7 +120,26 @@ const OrderTabs = ({ orders, onCompletePayment }: { orders: any[], onCompletePay
         >
           Completed ({completedOrders.length})
         </button>
+        <button
+          onClick={() => setActiveTab('all')}
+          className={`px-4 py-2 font-medium text-sm whitespace-nowrap ${
+            activeTab === 'all'
+              ? 'border-b-2 border-green-600 text-green-600 dark:text-green-400 dark:border-green-400'
+              : 'text-gray-500 dark:text-gray-400'
+          }`}
+        >
+          All Orders ({allOrders.length})
+        </button>
       </div>
+      {activeTab === 'all' &&
+  (allOrders.length > 0 ? (
+    <OrderList orders={allOrders} onCompletePayment={onCompletePayment} />
+  ) : (
+    <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg text-center">
+      <ShoppingBag className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+      <p className="text-gray-600 dark:text-gray-300">No orders found.</p>
+    </div>
+  ))}
 
       {activeTab === 'awaiting_payment' &&
         (awaitingPaymentOrders.length > 0 ? (
@@ -147,7 +170,10 @@ const OrderTabs = ({ orders, onCompletePayment }: { orders: any[], onCompletePay
             <p className="text-gray-600 dark:text-gray-300">No completed orders found.</p>
           </div>
         ))}
+        
+
     </div>
+    
   );
 };
 

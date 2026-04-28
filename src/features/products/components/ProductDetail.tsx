@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { SEO } from '../../../shared/components/SEO';
 import { supabase, retryOperation } from '../../../lib/supabaseClient';
 import { useProductReviewStatsQuery } from '../../reviews/services/reviewQueries';
 import { Star, ShoppingCart, Heart, Share2, ArrowLeft, MapPin } from 'lucide-react';
@@ -115,6 +116,7 @@ const disabled = addingToCartId === product.id || outOfStock || !canAddMore;
   const averageRating = reviewStats?.average_rating ?? product.rating
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+      <SEO title="Shiitake Mushroom Spawn | Buy Fresh Spawn in Nepal" description="Premium Shiitake mushroom spawn from A & C Farm, Nepal. High yield, disease-free spawn for commercial and home cultivation." />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <button
           onClick={() => setCurrentPage('shop')}
@@ -128,6 +130,7 @@ const disabled = addingToCartId === product.id || outOfStock || !canAddMore;
             <img
               src={product.image}
               alt={product.name}
+              loading="lazy"
               className="w-full h-full object-contain"
             />
           </div>
