@@ -21,7 +21,7 @@ export default function Hero({ setCurrentPage, setModal, session }: HeroProps) {
         />
         <img loading="lazy"
           src="/assets/images/product-bg.webp"
-          alt="A lush green valley with a river running through it"
+          alt="Fresh organic mushrooms growing at A & C Mushroom Farm in Pokhara, Nepal"
           className="absolute inset-0 w-full h-full object-cover"
         />
       </picture>
