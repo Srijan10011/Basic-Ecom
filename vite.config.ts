@@ -12,5 +12,5 @@ export default defineConfig({
       '/api': 'http://localhost:3001',
     },
   },
-  publicDir: 'assets',
+  publicDir: 'public',
 });
