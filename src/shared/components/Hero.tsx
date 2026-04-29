@@ -13,14 +13,14 @@ export default function Hero({ setCurrentPage, setModal, session }: HeroProps) {
       <picture>
         <source
           media="(min-width: 1280px)"
-          srcSet="/public/images/product-bg.webp"
+          srcSet="/images/product-bg.webp"
         />
         <source
           media="(min-width: 768px)"
-          srcSet="/public/images/product-bg.webp"
+          srcSet="/images/product-bg.webp"
         />
         <img loading="lazy"
-          src="/public/images/product-bg.webp"
+          src="/images/product-bg.webp"
           alt="Fresh organic mushrooms growing at A & C Mushroom Farm in Pokhara, Nepal"
           className="absolute inset-0 w-full h-full object-cover"
         />
